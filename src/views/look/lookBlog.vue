@@ -85,16 +85,32 @@
           <hr class="gray-hr"/>
         </div>
         <div style="margin-top: 10px">
-          <mavon-editor v-model="guideDetail.content"></mavon-editor>
+          <mavon-editor v-model="commentForm.comment"
+                        ref=md
+                        @imgAdd="$imgAdd"></mavon-editor>
           <div style="margin-top: 10px">
-            <el-button type="primary" style="color: white; background-color: steelblue">发布</el-button>
-            <el-button type="text">退出</el-button>
+            <el-button type="primary" style="color: white; background-color: steelblue" @click="submitComment()">发布</el-button>
+            <el-button type="text">取消</el-button>
           </div>
         </div>
       </div>
-      <div class="comment-section" style="">
+      <div class="comment-section" style="height: auto">
         评论区
         <hr class="gray-hr"/>
+        <div class="comment_main">
+          <div v-for="(comment, index) in comments" :key="comment.id">
+            <div class="comment-item">
+              <div>
+                <span style="font-weight: bold;color: cornflowerblue;">#{{index + 1}}楼</span>
+                <span style="color: #888888; margin-left: 10px; font-size: 14px">{{comment.modifyTime}}</span><br>
+              </div>
+              <div style="margin-top: 15px">
+                {{ comment.comment }}
+              </div>
+              <hr class="gray-hr" />
+            </div>
+          </div>
+        </div>
       </div>
     </el-main>
 
@@ -114,15 +130,20 @@ export default {
       isArrowUp: false,
       offset: 200,
       guideDetail: {
-        content: ''
+        content: '',
       },
       rules: {
         content: [
           {required: true, message: '请输入内容', trigger: 'blur'}
         ]
       },
+      comments:[],
       blog: {},
-      commentForm: {},
+      commentForm: {
+        comment:'',
+        userId:'',
+        blogId:''
+      },
       intervalId: null,
       formattedCreationTime: null,
     }
@@ -133,6 +154,34 @@ export default {
     },
   },
   methods: {
+    submitComment(){
+      const user = JSON.parse(sessionStorage.getItem("token"));
+      this.commentForm.userId = user.id
+      this.commentForm.blogId = this.blog.id
+      this.$axios.post("comment/addComment", this.commentForm).then(res => {
+        if(res.data.code === 200){
+          this.commentForm.comment = ""
+          this.$message.success("评论成功")
+          this.queryComment()
+        }
+        else {
+          this.$message.warning("网络异常")
+        }
+      })
+    },
+    $imgAdd(pos, $file) {
+      var formdata = new FormData();
+      formdata.append('image', $file);
+      this.$axios.post("upload/uploadBlogImage", formdata).then(res => {
+        if (res.status === 200) {
+          var url = res.data.data;
+          this.$refs.md.$img2Url(pos, url)
+        }
+        else {
+          this.$message("网络异常")
+        }
+      })
+    },
     handleScroll() {
       const contentSection = document.querySelector('.blog-content');
       if (contentSection) {
@@ -161,7 +210,17 @@ export default {
       const days = Math.floor(hours / 24);
       this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
-
+    queryComment(){
+      let blogId = this.blog.id
+      this.$axios.get("/comment/getCommentByBlog/" + blogId).then(res => {
+        if(res.data.code === 200){
+          this.comments = res.data.data
+        }
+        else{
+          this.$message.warning("网络异常，评论未正常加载")
+        }
+      })
+    }
   },
   mounted() {
     this.blog = this.$route.query.blog || "";
@@ -176,7 +235,11 @@ export default {
         block: 'start',
       });
     }
+    this.$nextTick(() => {
+      this.queryComment();
+    });
   },
+
   created() {
   },
   beforeDestroy() {
