@@ -1,5 +1,5 @@
 <template>
-  <div class="blog-app">
+  <div class="blog-app" v-if="loading">
 
     <!-- 主要内容区域 -->
     <main class="mainSearch">
@@ -61,7 +61,7 @@
                   type="text"
                   style="color: #3366cc; font-size: 13px; text-decoration: underline; font-weight: bold"
                   class="blog-title"
-                  @click="lookBlog(blog)"
+                  @click="lookBlog(blog.id)"
                   v-html="getBlogTitleWithEm(blog.title)"
               ></el-button>
               <div style="display: flex">
@@ -76,7 +76,12 @@
                   {{ blog.bloggerName }}
                 </el-button>
                 <span style="margin-left: 10px;margin-top: 12px">{{ blog.gmtModified }}</span>
-                <el-button type="text" style="margin-left: 10px" class="iconfont icon-dianzan1  "
+                <el-button type="text" style="margin-left: 10px;" class="iconfont icon-dianzan1"
+                           v-show="userLike.includes(blog.id.toString())"
+                           @click="likeBlog(blog.id)">{{ blog.likeCount }}
+                </el-button>
+                <el-button type="text" style="margin-left: 10px;color: #888888" class="iconfont icon-dianzan1"
+                           v-show="!userLike.includes(blog.id.toString())"
                            @click="likeBlog(blog.id)">{{ blog.likeCount }}
                 </el-button>
                 <el-button type="text" style="margin-left: 10px" class="iconfont icon-pinglun1">{{
@@ -119,9 +124,16 @@
         </div>
       </div>
 
-      <!--      页脚-->
-      <div style=" height: 50px; background-color: gainsboro">
-        <span>------------------------------------------------------------------------------------</span>
+      <!-- 页脚 -->
+      <div class="footer" style="background-color: gainsboro;display: flex;align-items: center;justify-content: center">
+        <div class="footer-content">
+          <p>© 2023 Your Blog. All rights reserved.</p>
+          <ul class="footer-links">
+            <a href="#" >关于我们</a>
+            <a href="#" style="margin-left: 10px">隐私政策</a>
+            <a href="#" style="margin-left: 10px">使用条款</a>
+          </ul>
+        </div>
       </div>
     </main>
   </div>
@@ -132,6 +144,8 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      userLike: [],
+      loading: false,
       showPagination : true,
       userImage: JSON.parse(sessionStorage.getItem("token")).image,
       formInline: {
@@ -190,8 +204,8 @@ export default {
 
   },
   methods: {
-    lookBlog(blog){
-      this.$router.push({ path: '/blog/lookBLog', query: { blog : blog } });
+    lookBlog(id){
+      this.$router.push({ path: '/blog/lookBLog', query: { id : id } } );
     },
     goToHome(){
       this.$router.push('/blog/home');
@@ -202,13 +216,30 @@ export default {
       }
     },
     likeBlog(id) {
-      this.editBlogForm.id = id
-      this.$axios.put("blog/isLikeBlog", this.editBlogForm).then(res => {
+      this.editBlogForm.blogId = id
+      let user = JSON.parse(sessionStorage.getItem("token"))
+      this.editBlogForm.userId = user.id;
+      this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
         if (res.data.code === 200) {
           this.pageNum = 1
-          this.queryAll()
+          this.queryByKeyword()
+          this.queryUserLikeBlog()
           this.$message.success("修改成功");
         } else {
+          this.$message.warning("网络异常")
+        }
+      })
+    },
+    queryUserLikeBlog(){
+      let user = JSON.parse(sessionStorage.getItem("token"))
+      this.$axios.get("isLike/queryLikeByUser", {
+        params: {
+          userId: user.id
+        }}).then(res => {
+        if(res.data.code === 200){
+          this.userLike = res.data.data
+        }
+        else {
           this.$message.warning("网络异常")
         }
       })
@@ -222,7 +253,6 @@ export default {
       this.pageNum = val
       this.queryByKeyword()
     },
-
     queryByKeyword() {
       this.$axios.get("blog/queryByKeyword", {
         params: {
@@ -233,6 +263,7 @@ export default {
       }).then(res => {
         if (res.data.code === 200) {
           this.blogs = res.data.data.records
+          this.loading = true
           if(this.blogs.length === 0){
             this.showPagination = false
           }
@@ -250,6 +281,7 @@ export default {
     // 当组件创建时，调用获取博客列表的函数
     this.formInline.keyword = this.$route.query.keyword || ''; // 使用默认值为空字符串
     this.queryByKeyword();
+    this.queryUserLikeBlog()
   },
 };
 </script>

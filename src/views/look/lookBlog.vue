@@ -21,7 +21,8 @@
       <div class="blog-content">
         <h1 class="blog-title">{{ blog.title }}</h1>
         <p class="blog-date">{{ blog.date }}</p>
-        <div v-html="blog.content"></div>
+<!--        <div v-html="blog.content"></div>-->
+        <div v-html="renderedMarkdown(blog.content)"></div>
       </div>
       <p style="text-align: center; font-size: 16px;font-weight: 700;color: #dddddd">__EOF__</p>
       <div class="user-section"
@@ -102,10 +103,12 @@
             <div class="comment-item">
               <div>
                 <span style="font-weight: bold;color: cornflowerblue;">#{{index + 1}}楼</span>
-                <span style="color: #888888; margin-left: 10px; font-size: 14px">{{comment.modifyTime}}</span><br>
+                <span style="color: #888888; margin-left: 10px; font-size: 14px">{{comment.modifyTime}}</span>
               </div>
-              <div style="margin-top: 15px">
-                {{ comment.comment }}
+              <div style="margin-top: 15px; display: flex; align-items: center; justify-content: left">
+                <div class="block"><el-avatar shape="square" :size="50" :src="comment.userImage"></el-avatar></div>
+                <span style="font-weight: bold;color: cornflowerblue;margin-left: 10px">{{comment.userName}}:</span>
+                <span style="margin-left: 10px">{{ comment.comment }}</span>
               </div>
               <hr class="gray-hr" />
             </div>
@@ -114,8 +117,8 @@
       </div>
     </el-main>
 
-    <div class="footer-content" style="height: 200px;background:  url('../../assets/img/1.png');">
-      <div  style=" background-size: 100%;background-image: url('../../assets/img/3.jpg'); width: 100%; justify-content: center;display: flex;align-items: center">
+    <div class="footer-content" style="height: 200px">
+      <div  style=" background-size: 100%; width: 100%; justify-content: center;display: flex;align-items: center">
         <div>
           <p style="color: #666666; font-family: Playball,serif;font-size: 20px">This blog has running: {{ formattedCreationTime }} ღゝ◡╹)ノ♡</p>
         </div>
@@ -124,6 +127,7 @@
   </div>
 </template>
 <script>
+import {marked} from 'marked';
 export default {
   data() {
     return {
@@ -132,13 +136,19 @@ export default {
       guideDetail: {
         content: '',
       },
+      blog:{},
       rules: {
         content: [
           {required: true, message: '请输入内容', trigger: 'blur'}
         ]
       },
       comments:[],
-      blog: {},
+      blogById: '',
+      editBlogForm: {
+        userId: "",
+        isLike: 1,
+        blogId:''
+      },
       commentForm: {
         comment:'',
         userId:'',
@@ -149,11 +159,29 @@ export default {
     }
   },
   computed: {
+    renderedMarkdown() {
+      return (content) => marked(content);
+    },
     formattedCreationTime() {
       return this.formatDate(this.blog.gmtCreate);
     },
   },
   methods: {
+    likeBlog(id) {
+      this.editBlogForm.blogId = id
+      let user = JSON.parse(sessionStorage.getItem("token"))
+      this.editBlogForm.userId = user.id;
+      this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
+        if (res.data.code === 200) {
+          this.pageNum = 1
+          this.queryAll()
+          this.queryUserLikeBlog()
+          this.$message.success("修改成功");
+        } else {
+          this.$message.warning("网络异常")
+        }
+      })
+    },
     submitComment(){
       const user = JSON.parse(sessionStorage.getItem("token"));
       this.commentForm.userId = user.id
@@ -210,9 +238,18 @@ export default {
       const days = Math.floor(hours / 24);
       this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
-    queryComment(){
-      let blogId = this.blog.id
-      this.$axios.get("/comment/getCommentByBlog/" + blogId).then(res => {
+    queryBlogMsg(id){
+      console.log(id)
+      this.$axios.get("blog/getBlogById/" + id).then(res => {
+        if(res.data.code === 200){
+          this.blog = res.data.data
+        } else {
+          this.$message.warning("网络异常")
+        }
+      })
+    },
+    queryComment(id){
+      this.$axios.get("/comment/getCommentByBlog/" + id).then(res => {
         if(res.data.code === 200){
           this.comments = res.data.data
         }
@@ -223,25 +260,29 @@ export default {
     }
   },
   mounted() {
-    this.blog = this.$route.query.blog || "";
-    this.formatDate(this.blog.gmtCreate); // Set initial value
+    this.blogById = this.$route.query.id || "";
+    this.queryBlogMsg(this.blogById)
+    this.formatDate(this.blog.gmtCreate);
     this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
     window.addEventListener('scroll', this.handleScroll);
-    window.scrollTo(0,0)
-    const topAnchor = document.getElementById('top');
-    if (topAnchor) {
-      topAnchor.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
     this.$nextTick(() => {
-      this.queryComment();
-    });
+      this.queryComment(this.blogById);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+    })
+    // const topAnchor = document.getElementById('top');
+    // if (topAnchor) {
+    //   topAnchor.scrollIntoView({
+    //     behavior: 'smooth',
+    //     block: 'start',
+    //   });
+    // }
   },
 
   created() {
   },
+
   beforeDestroy() {
     clearInterval(this.intervalId);
     window.removeEventListener('scroll', this.handleScroll);
@@ -377,8 +418,8 @@ body::-webkit-scrollbar-thumb:hover {
 .head {
   width: 100%;
   height: 100vh; /* 100% 屏幕高度，让背景图片铺满整个屏幕 */
-  background-image: url("../../assets/img/3.jpg");
   background-size: cover; /* 缩放背景图片以覆盖整个容器 */
+  background-image: url("../../assets/img/3.jpg");
   background-position: center center; /* 将背景图片居中显示 */
   margin: 0; /* 去掉默认边距 */
   padding: 0; /* 去掉默认填充 */

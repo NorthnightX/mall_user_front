@@ -60,7 +60,7 @@
                   <!-- 博客条目内容 -->
                   <el-button type="text"
                              style="color: #3366cc; font-size: 13px; text-decoration: underline; font-weight: bold"
-                             class="blog-title" @click="lookBlog(blog)">{{ blog.title }}
+                             class="blog-title" @click="lookBlog(blog.id)">{{ blog.title }}
                   </el-button>
                   <div style="display: flex">
                     <div>
@@ -74,14 +74,19 @@
                       {{ blog.bloggerName }}
                     </el-button>
                     <span style="margin-left: 10px;margin-top: 12px">{{ blog.gmtModified }}</span>
-                    <el-button type="text" style="margin-left: 10px" class="iconfont icon-dianzan1  "
+                    <el-button type="text" style="margin-left: 10px;" class="iconfont icon-dianzan1"
+                               v-show="userLike.includes(blog.id.toString())"
                                @click="likeBlog(blog.id)">{{ blog.likeCount }}
                     </el-button>
-                    <el-button type="text" style="margin-left: 10px" class="iconfont icon-pinglun1">{{
+                    <el-button type="text" style="margin-left: 10px;color: #888888" class="iconfont icon-dianzan1"
+                               v-show="!userLike.includes(blog.id.toString())"
+                               @click="likeBlog(blog.id)">{{ blog.likeCount }}
+                    </el-button>
+                    <el-button type="text" style="margin-left: 10px;color: #888888" class="iconfont icon-pinglun1">{{
                         blog.comment
                       }}
                     </el-button>
-                    <el-button type="text" style="margin-left: 10px" class="iconfont icon-chakan">{{
+                    <el-button type="text" style="margin-left: 10px;color: #888888" class="iconfont icon-chakan">{{
                         blog.clickCount
                       }}
                     </el-button>
@@ -117,9 +122,16 @@
             </div>
           </div>
 
-          <!--      页脚-->
-          <div style=" height: 50px; background-color: gainsboro">
-            <span>------------------------------------------------------------------------------------</span>
+          <!-- 页脚 -->
+          <div class="footer" style="background-color: gainsboro;display: flex;align-items: center;justify-content: center">
+            <div class="footer-content">
+              <p>© 2023 Your Blog. All rights reserved.</p>
+              <ul class="footer-links">
+                <a href="#" >关于我们</a>
+                <a href="#" style="margin-left: 10px">隐私政策</a>
+                <a href="#" style="margin-left: 10px">使用条款</a>
+              </ul>
+            </div>
           </div>
         </main>
       </div>
@@ -137,9 +149,11 @@ export default {
         keyword: ""
       },
       editBlogForm: {
-        id: "",
-        like: ""
+        userId: "",
+        isLike: 1,
+        blogId:''
       },
+      userLike: [],
       blogs: [],
       pageNum: 1, // 当前页码
       pageSize: 10, // 每页显示的博客数量
@@ -168,15 +182,19 @@ export default {
     editorBlog(){
       this.$router.push({path:'/blog/blogEditor'})
     },
-    lookBlog(blog){
-      this.$router.push({ path: '/blog/lookBLog', query: { blog : blog } } );
+    lookBlog(id){
+      this.$router.push({ path: '/blog/lookBLog', query: { id : id } } );
     },
+
     likeBlog(id) {
-      this.editBlogForm.id = id
-      this.$axios.put("blog/isLikeBlog", this.editBlogForm).then(res => {
+      this.editBlogForm.blogId = id
+      let user = JSON.parse(sessionStorage.getItem("token"))
+      this.editBlogForm.userId = user.id;
+      this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
         if (res.data.code === 200) {
           this.pageNum = 1
           this.queryAll()
+          this.queryUserLikeBlog()
           this.$message.success("修改成功");
         } else {
           this.$message.warning("网络异常")
@@ -194,6 +212,20 @@ export default {
     },
     searchBlog() {
       this.$router.push({ path: '/blog/search', query: { keyword: this.formInline.keyword } });
+    },
+    queryUserLikeBlog(){
+      let user = JSON.parse(sessionStorage.getItem("token"))
+      this.$axios.get("isLike/queryLikeByUser", {
+        params: {
+          userId: user.id
+        }}).then(res => {
+          if(res.data.code === 200){
+            this.userLike = res.data.data
+          }
+          else {
+            this.$message.warning("网络异常")
+          }
+      })
     },
     queryAll() {
       this.$axios.get("blog/getBlogPage", {
@@ -217,7 +249,7 @@ export default {
   created() {
     // 当组件创建时，调用获取博客列表的函数
     this.queryAll()
-
+    this.queryUserLikeBlog()
 
   },
 };
@@ -249,4 +281,8 @@ export default {
 [v-cloak] {
   display: none;
 }
+.red-like {
+  color: red; /* 或者其他您想要的红色样式 */
+}
+
 </style>
