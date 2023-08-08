@@ -143,6 +143,7 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      likeButtonDisabled: false,
       loading:false,
       userImage: JSON.parse(sessionStorage.getItem("token")).image,
       formInline: {
@@ -187,15 +188,33 @@ export default {
     },
 
     likeBlog(id) {
+      if(this.likeButtonDisabled){
+        this.$message.warning("您点的太快了")
+        return;
+      }
+      this.likeButtonDisabled = true
       this.editBlogForm.blogId = id
       let user = JSON.parse(sessionStorage.getItem("token"))
       this.editBlogForm.userId = user.id;
       this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
         if (res.data.code === 200) {
-          this.pageNum = 1
-          this.queryAll()
+          this.$message.success(res.data.data);
+          this.pageNum = 1;
           this.queryUserLikeBlog()
-          this.$message.success("修改成功");
+          // 根据返回的信息增减点赞数以及更新 blogs 中对应博客的点赞信息
+          const blogIndex = this.blogs.findIndex(blog => blog.id === id);
+          if (blogIndex !== -1) {
+            if (res.data.data === "点赞成功") {
+              this.blogs[blogIndex].likeCount++; // 增加点赞数
+            } else {
+              this.blogs[blogIndex].likeCount--; // 减少点赞数
+            }
+          }
+          setTimeout(() => {
+            this.pageNum = 1;
+            this.queryAll()
+            this.likeButtonDisabled = false
+          }, 1000);
         } else {
           this.$message.warning("网络异常")
         }

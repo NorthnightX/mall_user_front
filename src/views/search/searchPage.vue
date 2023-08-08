@@ -46,10 +46,11 @@
             <img src="../../assets/img/img.png" alt="查询未命中"><br>
             <span>抱歉！没有找到您搜索的相关内容。</span><br>
             <div style="padding-top: 5px">
-              <span >建议您：</span><br>
+              <span>建议您：</span><br>
               <br>
               <span style="margin-left: 5%">检查输入的关键词是否正确；</span><br>
-              <span style="margin-left: 5%">向园子的服务人员<span style="color: #3a8ee6;text-decoration: underline">反馈问题</span>；</span><br>
+              <span style="margin-left: 5%">向园子的服务人员<span
+                  style="color: #3a8ee6;text-decoration: underline">反馈问题</span>；</span><br>
               <span style="margin-left: 5%">去<span style="color: #3a8ee6;text-decoration: underline">博问</span>寻求园友的的帮助。</span>
             </div>
           </div>
@@ -129,7 +130,7 @@
         <div class="footer-content">
           <p>© 2023 Your Blog. All rights reserved.</p>
           <ul class="footer-links">
-            <a href="#" >关于我们</a>
+            <a href="#">关于我们</a>
             <a href="#" style="margin-left: 10px">隐私政策</a>
             <a href="#" style="margin-left: 10px">使用条款</a>
           </ul>
@@ -144,16 +145,18 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      likeButtonDisabled: false,
       userLike: [],
       loading: false,
-      showPagination : true,
+      showPagination: true,
       userImage: JSON.parse(sessionStorage.getItem("token")).image,
       formInline: {
         keyword: ""
       },
       editBlogForm: {
-        id: "",
-        like: ""
+        userId: "",
+        isLike: 1,
+        blogId: ''
       },
       blogs: [],
       pageNum: 1, // 当前页码
@@ -204,10 +207,10 @@ export default {
 
   },
   methods: {
-    lookBlog(id){
-      this.$router.push({ path: '/blog/lookBLog', query: { id : id } } );
+    lookBlog(id) {
+      this.$router.push({path: '/blog/lookBLog', query: {id: id}});
     },
-    goToHome(){
+    goToHome() {
       this.$router.push('/blog/home');
     },
     search() {
@@ -216,30 +219,47 @@ export default {
       }
     },
     likeBlog(id) {
+      if (this.likeButtonDisabled) {
+        this.$message.warning("您点的太快了")
+        return; // 如果按钮已禁用，不执行操作
+      }
+      this.likeButtonDisabled = true; // 禁用按钮
       this.editBlogForm.blogId = id
       let user = JSON.parse(sessionStorage.getItem("token"))
       this.editBlogForm.userId = user.id;
       this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
         if (res.data.code === 200) {
-          this.pageNum = 1
-          this.queryByKeyword()
+          this.$message.success(res.data.data);
+          this.pageNum = 1;
           this.queryUserLikeBlog()
-          this.$message.success("修改成功");
+          const blogIndex = this.blogs.findIndex(blog => blog.id === id);
+          if (blogIndex !== -1) {
+            if (res.data.data === "点赞成功") {
+              this.blogs[blogIndex].likeCount++; // 增加点赞数
+            } else {
+              this.blogs[blogIndex].likeCount--; // 减少点赞数
+            }
+          }
+          setTimeout(() => {
+            this.pageNum = 1;
+            this.queryByKeyword();
+            this.likeButtonDisabled = false;
+          }, 1000);
         } else {
           this.$message.warning("网络异常")
         }
       })
     },
-    queryUserLikeBlog(){
+    queryUserLikeBlog() {
       let user = JSON.parse(sessionStorage.getItem("token"))
       this.$axios.get("isLike/queryLikeByUser", {
         params: {
           userId: user.id
-        }}).then(res => {
-        if(res.data.code === 200){
-          this.userLike = res.data.data
         }
-        else {
+      }).then(res => {
+        if (res.data.code === 200) {
+          this.userLike = res.data.data
+        } else {
           this.$message.warning("网络异常")
         }
       })
@@ -264,10 +284,9 @@ export default {
         if (res.data.code === 200) {
           this.blogs = res.data.data.records
           this.loading = true
-          if(this.blogs.length === 0){
+          if (this.blogs.length === 0) {
             this.showPagination = false
-          }
-          else{
+          } else {
             this.showPagination = true
           }
           this.total = res.data.data.total
@@ -290,6 +309,7 @@ export default {
 em {
   color: red; /* 设置<em>标签中的文本为红色 */
 }
+
 .search-bar {
   display: flex;
   justify-content: space-between;
