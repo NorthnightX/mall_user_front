@@ -190,7 +190,7 @@ export default {
         if(res.data.code === 200){
           this.commentForm.comment = ""
           this.$message.success("评论成功")
-          this.queryComment()
+          this.queryComment(this.blogById)
         }
         else {
           this.$message.warning("网络异常")
