@@ -1,0 +1,333 @@
+<template>
+
+  <div class="container">
+    <a id="top"></a>
+    <div class="head" style="align-items: center; justify-content: center;display: flex; flex-direction: column; ">
+      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>NorthNightX</span></h1>
+      <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
+
+
+      <div class="arrow" :class="{ 'arrow-up': isArrowUp }" @click="scrollToContent">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+          <path d="M7 10l5 5 5-5z" />
+          <path d="M0 0h24v24H0z" fill="none" />
+        </svg>
+      </div>
+    </div>
+
+
+    <!-- 博客内容展示区域 -->
+    <el-main class="main">
+      <div class="blogByUser">
+        <div v-for="blog in blogs" :key="blog.id" class="blog-item" style="width: 100%; height: 250px">
+          <!-- 博客条目内容 -->
+          <el-button type="text"
+                     style="color: black; font-size: 33px;font-weight: normal; margin-top: 15px"
+                     class="blog-title" @click="lookBlog(blog.id)">{{ blog.title }}
+          </el-button>
+          <div style="display: flex;">
+            <div style="color: #999; font-size: 15px;"
+                 > 发布于{{ blog.gmtCreate }}</div>
+            <div style="color: #999; font-size: 15px; margin-left: 10px;"
+                 class="iconfont icon-chakan"> 点击量 ：{{ blog.clickCount }}</div>
+            <div style="color: #999; font-size: 15px; margin-left: 10px;"
+                 class="iconfont icon-pinglun1"> 评论 ：{{ blog.comment }}</div>
+            <div style="color: #999; font-size: 15px; margin-left: 10px;"
+                 class="iconfont icon-dianzan1"> 推荐 ：{{ blog.likeCount }}</div>
+          </div>
+
+          <div style="margin-top: 20px">
+            <span style="color: #555; font-weight: bold;">摘要 : {{ getBlogSummary(blog.content) }}</span>
+            <div style="position: absolute;">
+            <el-button type="text" style="font-size: 16px;font-weight: 550; border-bottom: 2px solid #666;
+            display: block; text-align: center;color: #555 !important;padding: 0; margin-top: 35px"
+                       @click="lookBlog(blog.id)">阅读全文 »</el-button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </el-main>
+
+    <div class="footer-content" style="height: 200px">
+      <div  style=" background-size: 100%; width: 100%; justify-content: center;display: flex;align-items: center">
+        <div>
+          <p style="color: #666666; font-family: Playball,serif;font-size: 20px">This blog has running: {{ formattedCreationTime }} ღゝ◡╹)ノ♡</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+import {marked} from 'marked';
+export default {
+  data() {
+    return {
+      blogs:[] ,
+      isArrowUp: false,
+      offset: 200,
+
+      intervalId: null,
+      formattedCreationTime: null,
+    }
+  },
+  computed: {
+    renderedMarkdown() {
+      return (content) => marked(content);
+    },
+    formattedCreationTime() {
+      return this.formatDate(this.blog.gmtCreate);
+    },
+    getBlogSummary() {
+      return (content) => {
+        // 去除内容中的HTML标签
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = content;
+        // 去除内容中的HTML标签，并将多个连续空格替换为单个空格
+        const summaryWithoutTags = tempDiv.textContent.replace(/\s+/g, " ").trim();
+        // 如果内容长度小于等于30，则直接返回摘要
+        if (summaryWithoutTags.length <= 100) {
+          return summaryWithoutTags;
+        }
+        // 截取前30个字符作为摘要，并在末尾加上省略号
+        return summaryWithoutTags.substring(0, 100) + "...";
+      };
+    },
+  },
+  methods: {
+    lookBlog(id) {
+      this.$router.push({path: '/blog/lookBLog', query: {id: id}});
+    },
+    handleScroll() {
+      const contentSection = document.querySelector('.blog-content');
+      if (contentSection) {
+        const contentRect = contentSection.getBoundingClientRect();
+        const contentMiddle = contentRect.top + contentRect.height / 2;
+        this.isArrowUp = window.scrollY >= contentMiddle - this.offset;
+      }
+    },
+    scrollToContent() {
+      const contentSection = document.querySelector('.blog-content');
+      if (contentSection) {
+        contentSection.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    },
+    // 展示时间格式
+    formatDate(dateString) {
+      const creationTime = new Date(dateString);
+      const currentTime = new Date();
+      const timeDifference = currentTime - creationTime;
+      const seconds = Math.floor(timeDifference / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+      this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
+    },
+    queryBlogByUser(id){
+      this.$axios.get("blog/blogByUser/" + id).then(res => {
+        if(res.data.code === 200){
+          this.blogs = res.data.data;
+        }
+        else{
+          this.$message.warning("网络异常")
+        }
+      })
+    }
+  },
+  mounted() {
+    let user = JSON.parse(sessionStorage.getItem("token"));
+    this.queryBlogByUser(user.id)
+    // this.formatDate(this.blog.gmtCreate);
+    // this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
+    window.addEventListener('scroll', this.handleScroll);
+    this.$nextTick(() => {
+      this.queryComment(this.blogById);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+    })
+    const topAnchor = document.getElementById('top');
+    if (topAnchor) {
+      topAnchor.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  },
+
+  created() {
+  },
+
+  beforeDestroy() {
+    // clearInterval(this.intervalId);
+    window.removeEventListener('scroll', this.handleScroll);
+  },
+};
+</script>
+
+<style>
+/* 自定义样式 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  margin: 0 auto;
+  max-width: 100%;
+//padding: 20px;
+  height: auto; /* 修改这行样式 */
+  overflow: auto; /* 添加这行样式 */
+  border-width: 10px;
+}
+
+.blog-item {
+  width: 65%;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.blog-title {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.blog-date {
+  font-size: 14px;
+  color: #888;
+}
+
+.user-section {
+  height: 150px;
+  width: 100%;
+  margin-top: 10px;
+  background-color: white;
+  border-radius: 10px; /* Add rounded corners */
+  transition: background-color 0.3s ease-in-out; /* Add transition effect */
+}
+
+.gray-hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 0;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.comment-section {
+  margin-top: 40px;
+  height: 100px;
+  width: 100%;
+  background-color: white;
+  border-radius: 10px; /* Add rounded corners */
+  transition: background-color 0.3s ease-in-out; /* Add transition effect */
+}
+
+.blog-content {
+  padding: 20px;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* 添加阴影过渡效果 */
+.main {
+  background-color: white;
+  width: auto;
+  min-width: 65%;
+  overflow: hidden; /* 当内容超过div宽度时，隐藏溢出部分 */
+  max-width: 68%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+/* 添加过渡效果 */
+.blog-content > * {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* 隐藏浏览器默认的滚动条样式 */
+body::-webkit-scrollbar {
+  width: 0.2rem; /* 设置滚动条宽度 */
+}
+
+/* 设置滚动条轨道的背景色 */
+body::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+/* 设置滚动条滑块的背景色 */
+body::-webkit-scrollbar-thumb {
+  background-color: #888;
+}
+
+/* 当滚动条处于hover状态时，设置滚动条滑块的背景色 */
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.footer-content {
+  width: 100%;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.footer p {
+  margin: 10px 0;
+  color: #666;
+}
+
+.footer-links li {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+.footer-links li:last-child {
+  margin-right: 0;
+}
+
+.footer-links a {
+  color: #666;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: #3a8ee6;
+}
+.head {
+  width: 100%;
+  height: 100vh; /* 100% 屏幕高度，让背景图片铺满整个屏幕 */
+  background-size: cover; /* 缩放背景图片以覆盖整个容器 */
+  background-image: url("../../assets/img/3.jpg");
+  background-position: center center; /* 将背景图片居中显示 */
+  margin: 0; /* 去掉默认边距 */
+  padding: 0; /* 去掉默认填充 */
+}
+
+
+.arrow {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 999;
+  transition: transform 0.2s;
+}
+
+.arrow svg {
+  width: 48px;
+  height: 48px;
+  fill: steelblue;
+}
+
+.arrow.arrow-up svg {
+  transform: rotate(180deg);
+}
+</style>

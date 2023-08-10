@@ -31,13 +31,23 @@ const routes = [
   },
   {
     path: '/blog/lookBlog',
-    name: 'look',
+    name: 'lookBlog',
     component:  () => import("../views/look/lookBlog.vue")
   },
   {
     path: '/blog/blogEditor',
-    name: 'look',
+    name: 'blogEditor',
     component:  () => import("../views/editor/blogEditor.vue")
+  },
+  {
+    path: '/blog/userBlog',
+    name: 'userBlog',
+    component:  () => import("../views/user/userBlog.vue")
+  },
+  {
+    path: '/user/userEditor',
+    name: 'userEditor',
+    component:  () => import("../views/user/userEditor.vue")
   }
 ]
 
@@ -52,7 +62,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.path === '/' || to.path === '/reg') {
+  if (to.path === '/' || to.path === '/reg' || to.path === '/login') {
     return next()
   } else {
     let user = sessionStorage.getItem('token')
