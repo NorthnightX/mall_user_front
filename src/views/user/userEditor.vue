@@ -90,6 +90,7 @@ export default {
       showButtons: false,
       userImage: "",
       formData: {
+        field:"",
         id:'',
         image: '',
         name: '',
@@ -117,6 +118,7 @@ export default {
             var url = res.data.data;
             this.userImage = url;
             this.formData.image = url;
+            this.formData.field="image"
             this.updateUser()
           } else {
             this.$message('网络异常');
@@ -128,6 +130,7 @@ export default {
       this.$axios.put("/user/update", this.formData).then(res => {
         if(res.data.code === 200){
           this.queryLoginUser()
+          this.formData.field = ""
         }
         else{
           this.$message.warning("网络异常")

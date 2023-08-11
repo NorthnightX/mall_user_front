@@ -21,8 +21,7 @@
       <div class="blog-content">
         <h1 class="blog-title">{{ blog.title }}</h1>
         <p class="blog-date">{{ blog.date }}</p>
-<!--        <div v-html="blog.content"></div>-->
-        <div v-html="renderedMarkdown(blog.content)"></div>
+        <div v-html="markedContent"></div>
       </div>
       <p style="text-align: center; font-size: 16px;font-weight: 700;color: #dddddd">__EOF__</p>
       <div class="user-section"
@@ -128,6 +127,7 @@
 </template>
 <script>
 import {marked} from 'marked';
+import hljs from 'highlight.js';
 export default {
   data() {
     return {
@@ -159,8 +159,16 @@ export default {
     }
   },
   computed: {
-    renderedMarkdown() {
-      return (content) => marked(content);
+    markedContent() {
+      marked.setOptions({
+        highlight: (code, lang) => {
+          if (lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(lang, code).value;
+          }
+          return hljs.highlightAuto(code).value;
+        },
+      });
+      return marked(this.blog.content);
     },
     formattedCreationTime() {
       return this.formatDate(this.blog.gmtCreate);
@@ -271,13 +279,6 @@ export default {
         window.scrollTo(0, 0);
       }, 50);
     })
-    // const topAnchor = document.getElementById('top');
-    // if (topAnchor) {
-    //   topAnchor.scrollIntoView({
-    //     behavior: 'smooth',
-    //     block: 'start',
-    //   });
-    // }
   },
 
   created() {

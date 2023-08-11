@@ -50,12 +50,7 @@
 
     </el-main>
 
-    <div class="footer-content" style="height: 200px">
-      <div  style=" background-size: 100%; width: 100%; justify-content: center;display: flex;align-items: center">
-        <div>
-          <p style="color: #666666; font-family: Playball,serif;font-size: 20px">This blog has running: {{ formattedCreationTime }} ღゝ◡╹)ノ♡</p>
-        </div>
-      </div>
+    <div class="footer-content" style="height: 50px">
     </div>
   </div>
 </template>

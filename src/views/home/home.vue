@@ -120,14 +120,15 @@
 
           <!--        左边栏-->
           <div style="width: 20%; background-color: #F4F3F2">
-            <div style="height: 300px; background-color: #3a8ee6">
-              48小时阅读排行
+            <div style="height: 300px;margin-top: 20px;margin-left: 15px">
+              48小时阅读排行：
+              <div v-for="(blog, index) in readNumMaxInTwoDaysBlogs" :key="blog.id">
+                <el-button type="text" style="color: black; font-weight: normal;font-size: 10px"> {{index + 1}} &nbsp; {{getBlogTitle(blog.title)}}</el-button>
+              </div>
             </div>
-            <div style="height: 300px; background-color: gold">
-              十天阅读排行
-            </div>
-            <div style="height: 300px; background-color: darkorange">
-              推荐阅读
+            <div style="margin-top: 10px">
+              <span style="font-weight: bold;
+              font-family: LongCang-Regular, cursive;">今日活跃用户：{{this.loginCount}}</span>
             </div>
           </div>
         </div>
@@ -156,8 +157,10 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      readNumMaxInTwoDaysBlogs: [],
       likeButtonDisabled: false,
       loading: false,
+      loginCount: '',
       userImage: JSON.parse(sessionStorage.getItem("token")).image,
       formInline: {
         keyword: ""
@@ -191,6 +194,14 @@ export default {
         return summaryWithoutTags.substring(0, 100) + "...";
       };
     },
+    getBlogTitle() {
+      return (content) => {
+        if (content.length <= 16) {
+          return content;
+        }
+        return content.substring(0, 16) + "...";
+      };
+    },
   },
   methods: {
     countSetUp() {
@@ -220,7 +231,6 @@ export default {
     lookBlog(id) {
       this.$router.push({path: '/blog/lookBLog', query: {id: id}});
     },
-
     likeBlog(id) {
       if (this.likeButtonDisabled) {
         this.$message.warning("您点的太快了")
@@ -298,12 +308,27 @@ export default {
         }
       })
     },
+    readNumMaxInTwoDays(){
+      this.$axios.get("blog/readNumMaxInTwoDays").then(res => {
+          if(res.data.code === 200){
+            this.readNumMaxInTwoDaysBlogs = res.data.data
+          }
+      })
+    },
+    getActiveUserToday(){
+      this.$axios.get("user/getActiveUserToday").then(res => {
+          if(res.data.code === 200){
+            this.loginCount = res.data.data
+          }
+      })
+    }
   },
   created() {
     // 当组件创建时，调用获取博客列表的函数
     this.queryAll()
     this.queryUserLikeBlog()
-
+    this.getActiveUserToday()
+    this.readNumMaxInTwoDays()
   },
 };
 </script>

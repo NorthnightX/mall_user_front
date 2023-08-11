@@ -15,7 +15,7 @@
               <el-button style="margin-left: 18px; font-size: 13.5px; font-weight: bold" type="text">发现</el-button>
             </div>
             <div>
-              <el-button style="font-size: 13.5px; font-weight: bold" type="text">名字</el-button>
+              <el-button style="font-size: 13.5px; font-weight: bold" type="text">{{ this.user.nickName }}</el-button>
               <el-button style="margin-left: 10px; font-size: 13.5px; font-weight: bold" type="text">博客</el-button>
               <el-button style="margin-left: 10px; font-size: 13.5px; font-weight: bold" type="text">消息</el-button>
               <el-button style="margin-left: 10px; font-size: 13.5px; font-weight: bold" type="text">设置</el-button>
@@ -139,6 +139,7 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      user:{},
       editAddTypeForm : {
         name:"",
         isPublic: '1',
@@ -238,6 +239,7 @@ export default {
     }
   },
   created() {
+    this.user = JSON.parse(sessionStorage.getItem("token"))
     this.selectTypeByLoginUser()
   }
 };
