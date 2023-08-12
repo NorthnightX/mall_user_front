@@ -1,6 +1,6 @@
 <template>
 
-  <div class="container">
+  <div class="container" v-show="loading">
     <a id="top"></a>
     <div class="head" style="align-items: center; justify-content: center;display: flex; flex-direction: column; ">
       <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>NorthNightX</span></h1>
@@ -67,6 +67,7 @@ import {marked} from 'marked';
 export default {
   data() {
     return {
+      loading: false,
       blogs:[] ,
       isArrowUp: false,
       offset: 200,
@@ -140,6 +141,7 @@ export default {
       this.$axios.get("blog/blogByUser/" + id).then(res => {
         if(res.data.code === 200){
           this.blogs = res.data.data;
+          this.loading = true
         }
         else{
           this.$message.warning("网络异常")

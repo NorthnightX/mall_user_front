@@ -136,10 +136,16 @@
 <script>
 import {marked} from 'marked';
 import hljs from 'highlight.js';
+import {MessageBox} from "element-ui";
 
 export default {
   data() {
     return {
+      deleteCommentForm:{
+        userId:'',
+        commentId:'',
+        blogId:''
+      },
       isArrowUp: false,
       offset: 200,
       guideDetail: {
@@ -186,8 +192,27 @@ export default {
   },
   methods: {
     deleteComment(id){
-      let userId = this.user.id;
-
+      MessageBox.confirm('确定要删除吗？', '确认删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let userId = this.user.id;
+        this.deleteCommentForm.commentId = id
+        this.deleteCommentForm.userId = userId
+        this.deleteCommentForm.blogId = this.blog.id
+        this.$axios.put(("/comment/deleteComment"), this.deleteCommentForm).then(res => {
+          if(res.data.code === 200){
+            this.$message.success(res.data.data);
+            setTimeout(() => {
+              this.queryComment(this.blog.id)
+            }, 500);
+          }
+          else{
+            this.$message.warning(res.data.message);
+          }
+        })
+      })
     },
     goToHome() {
       this.$router.push('/blog/home');
