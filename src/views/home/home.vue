@@ -50,15 +50,15 @@
         <!--      主要区域-->
         <div class="main-body" style="margin-top: -30px">
           <!--        右边栏-->
-          <div style="width: 15%; background-color: whitesmoke">
+          <div style="width: 15%; background-color: #fcfcfc">
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
-              <a type="text" style="margin-top: 20px" class="iconfont icon-fenlei">&nbsp 分类</a>
-              <a type="text" style="margin-top: 20px" class="iconfont icon-dingyuehao">&nbsp 订阅</a>
-              <a type="text" style="margin-top: 20px" class="iconfont icon-guanzhu">&nbsp 关注</a>
-              <a type="text" style="margin-top: 20px" class="iconfont icon-dianzan">&nbsp 点赞</a>
-              <a type="text" style="margin-top: 20px" class="iconfont icon-pinglun">&nbsp 评论</a>
-              <a type="text" style="margin-top: 20px" class="iconfont icon-gengduo">&nbsp 更多</a>
-              <a type="text" style="margin-top: 20px" class="iconfont icon-wentifankui">&nbsp 反馈</a>
+              <el-button type="text" style="color: black;margin-left: 12px" class="iconfont icon-fenlei">&nbsp 分类</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-dingyuehao">&nbsp 订阅</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-guanzhu">&nbsp 关注</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-dianzan" @click="userLikeBlogs()">&nbsp 点赞</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-pinglun">&nbsp 评论</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-gengduo">&nbsp 更多</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-wentifankui">&nbsp 反馈</el-button>
             </div>
           </div>
           <!--        中间博客区域-->
@@ -119,15 +119,16 @@
           </div>
 
           <!--        左边栏-->
-          <div style="width: 20%; background-color: #F4F3F2">
-            <div style="height: 300px;margin-top: 20px;margin-left: 15px">
+          <div style="width: 20%; background-color:#fcfcfc">
+            <div style="height: auto;margin-top: 20px;margin-left: 15px">
               48小时阅读排行：
               <div v-for="(blog, index) in readNumMaxInTwoDaysBlogs" :key="blog.id">
-                <el-button type="text" style="color: black; font-weight: normal;font-size: 10px"> {{index + 1}} &nbsp; {{getBlogTitle(blog.title)}}</el-button>
+                <el-button type="text" style="color: black; font-weight: normal;font-size: 10px" @click="lookBlog(blog.id)"> {{index + 1}} &nbsp; {{getBlogTitle(blog.title)}}</el-button>
+
               </div>
             </div>
             <div style="margin-top: 10px">
-              <span style="font-weight: bold;
+              <span style="font-weight: bold;margin-left: 10px;
               font-family: LongCang-Regular, cursive;">今日活跃用户：{{this.loginCount}}</span>
             </div>
           </div>
@@ -204,6 +205,9 @@ export default {
     },
   },
   methods: {
+    userLikeBlogs(){
+      this.$router.push({path: '/user/likeBLogs'})
+    },
     countSetUp() {
       this.$router.push({path: '/user/userEditor'})
     },

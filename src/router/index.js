@@ -48,6 +48,11 @@ const routes = [
     path: '/user/userEditor',
     name: 'userEditor',
     component:  () => import("../views/user/userEditor.vue")
+  },
+  {
+    path: '/user/likeBLogs',
+    name: 'userLikeBLogs',
+    component:  () => import("../views/user/userLikeBLogs.vue")
   }
 ]
 

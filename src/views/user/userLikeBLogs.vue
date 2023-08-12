@@ -3,10 +3,10 @@
   <div class="container">
     <a id="top"></a>
     <div class="head" style="align-items: center; justify-content: center;display: flex; flex-direction: column; ">
-      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>NorthNightX</span></h1>
-      <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
-
-
+      <div style="flex-direction: column;display: flex;align-items: center;justify-content: center;">
+        <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>NorthNightX</span></h1>
+        <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
+      </div>
       <div class="arrow" :class="{ 'arrow-up': isArrowUp }" @click="scrollToContent">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
           <path d="M7 10l5 5 5-5z" />
@@ -14,15 +14,14 @@
         </svg>
       </div>
     </div>
-
     <el-button class="custom-button" @click="goToHome()">HOME</el-button>
     <!-- 博客内容展示区域 -->
     <el-main class="main">
       <div v-show="blogs.length === 0" style="height: 300px;display: flex;justify-content: center">
         <div>
-          <h2>您还没有博客哦，去写一个吧~</h2><br>
+          <h2>您目前还没发现喜欢的博客哦~</h2><br>
           <div style="display: flex;align-items: center;justify-content: center">
-            <el-button type="text" class="el-icon-edit-outline" @click="editorBlog()">撰写博客</el-button>
+            <el-button type="text" class="el-icon-house" @click="goToHome()">返回主页</el-button>
           </div>
         </div>
       </div>
@@ -35,7 +34,7 @@
           </el-button>
           <div style="display: flex;">
             <div style="color: #999; font-size: 15px;"
-                 > 发布于{{ blog.gmtCreate }}</div>
+            > 发布于{{ blog.gmtCreate }}</div>
             <div style="color: #999; font-size: 15px; margin-left: 10px;"
                  class="iconfont icon-chakan"> 点击量 ：{{ blog.clickCount }}</div>
             <div style="color: #999; font-size: 15px; margin-left: 10px;"
@@ -47,9 +46,9 @@
           <div style="margin-top: 20px">
             <span style="color: #555; font-weight: bold;">摘要 : {{ getBlogSummary(blog.content) }}</span>
             <div style="position: absolute;">
-            <el-button type="text" style="font-size: 16px;font-weight: 550; border-bottom: 2px solid #666;
+              <el-button type="text" style="font-size: 16px;font-weight: 550; border-bottom: 2px solid #666;
             display: block; text-align: center;color: #555 !important;padding: 0; margin-top: 35px"
-                       @click="lookBlog(blog.id)">阅读全文 »</el-button>
+                         @click="lookBlog(blog.id)">阅读全文 »</el-button>
             </div>
           </div>
 
@@ -76,9 +75,6 @@ export default {
     }
   },
   computed: {
-    editorBlog() {
-      this.$router.push({path: '/blog/blogEditor'})
-    },
     renderedMarkdown() {
       return (content) => marked(content);
     },
@@ -136,8 +132,8 @@ export default {
       const days = Math.floor(hours / 24);
       this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
-    queryBlogByUser(id){
-      this.$axios.get("blog/blogByUser/" + id).then(res => {
+    queryLikeBlogByUser(id){
+      this.$axios.get("blog/userLikeBlogs/" + id).then(res => {
         if(res.data.code === 200){
           this.blogs = res.data.data;
         }
@@ -149,7 +145,7 @@ export default {
   },
   mounted() {
     let user = JSON.parse(sessionStorage.getItem("token"));
-    this.queryBlogByUser(user.id)
+    this.queryLikeBlogByUser(user.id)
     // this.formatDate(this.blog.gmtCreate);
     // this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
     window.addEventListener('scroll', this.handleScroll);
@@ -211,6 +207,8 @@ export default {
 .custom-button:hover::before {
   background-color: transparent;
 }
+
+
 /* 自定义样式 */
 .container {
   display: flex;

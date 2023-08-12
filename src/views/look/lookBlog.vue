@@ -14,7 +14,7 @@
         </svg>
       </div>
     </div>
-
+    <el-button class="custom-button" @click="goToHome()">HOME</el-button>
 
     <!-- 博客内容展示区域 -->
     <el-main class="main">
@@ -104,15 +104,23 @@
                 <span style="font-weight: bold;color: cornflowerblue;">#{{index + 1}}楼</span>
                 <span style="color: #888888; margin-left: 10px; font-size: 14px">{{comment.modifyTime}}</span>
               </div>
-              <div style="margin-top: 15px; display: flex; align-items: center; justify-content: left">
-                <div class="block"><el-avatar shape="square" :size="50" :src="comment.userImage"></el-avatar></div>
-                <span style="font-weight: bold;color: cornflowerblue;margin-left: 10px">{{comment.userName}}:</span>
-                <span style="margin-left: 10px">{{ comment.comment }}</span>
+              <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                <div style="display: flex; align-items: center;">
+                  <div class="block"><el-avatar shape="square" :size="50" :src="comment.userImage"></el-avatar></div>
+                  <span style="font-weight: bold;color: cornflowerblue;margin-left: 10px">{{comment.userName}}:</span>
+                  <span style="margin-left: 10px">{{ comment.comment }}</span>
+                </div>
+                <div>
+                  <el-button  type="text"  style="color: #3366cc;font-size: 10px"
+                              v-show="blog.bloggerId === user.id || comment.userId === user.id"
+                              @click="deleteComment(comment.id)">删除</el-button>
+                </div>
               </div>
               <hr class="gray-hr" />
             </div>
           </div>
         </div>
+
       </div>
     </el-main>
 
@@ -128,6 +136,7 @@
 <script>
 import {marked} from 'marked';
 import hljs from 'highlight.js';
+
 export default {
   data() {
     return {
@@ -136,6 +145,7 @@ export default {
       guideDetail: {
         content: '',
       },
+      user:{},
       blog:{},
       rules: {
         content: [
@@ -175,6 +185,13 @@ export default {
     },
   },
   methods: {
+    deleteComment(id){
+      let userId = this.user.id;
+
+    },
+    goToHome() {
+      this.$router.push('/blog/home');
+    },
     likeBlog(id) {
       this.editBlogForm.blogId = id
       let user = JSON.parse(sessionStorage.getItem("token"))
@@ -198,7 +215,9 @@ export default {
         if(res.data.code === 200){
           this.commentForm.comment = ""
           this.$message.success("评论成功")
-          this.queryComment(this.blogById)
+          setTimeout(() => {
+            this.queryComment(this.blogById)
+          }, 1000);
         }
         else {
           this.$message.warning("网络异常")
@@ -270,6 +289,7 @@ export default {
   mounted() {
     this.blogById = this.$route.query.id || "";
     this.queryBlogMsg(this.blogById)
+    this.user = JSON.parse(sessionStorage.getItem("token"))
     this.formatDate(this.blog.gmtCreate);
     this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
     window.addEventListener('scroll', this.handleScroll);
@@ -292,6 +312,38 @@ export default {
 </script>
 
 <style>
+.custom-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 20px 25px;
+  padding: 5px 10px;
+  background-color: transparent;
+  color: white;
+  width: 100px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow: hidden; /* 隐藏伪元素超出的部分 */
+}
+
+.custom-button::before {
+  content: "";
+  position: absolute;
+  top: -1px; /* 负值表示向内偏移，实现更细的边框 */
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border: 0.5px solid white; /* 更细的边框 */
+  border-radius: 4px; /* 与按钮相同的圆角 */
+}
+.custom-button:hover {
+  background-color: transparent; /* 鼠标悬停时背景透明 */
+}
+
+.custom-button:hover::before {
+  background-color: transparent;
+}
 /* 自定义样式 */
 .container {
   display: flex;
