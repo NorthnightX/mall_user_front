@@ -113,14 +113,12 @@
 
         <!--        左边栏-->
         <div style="width: 25%; background-color: #F4F3F2">
-          <div style="height: 300px; background-color: #3a8ee6">
-            48小时阅读排行
-          </div>
-          <div style="height: 300px; background-color: gold">
-            十天阅读排行
-          </div>
-          <div style="height: 300px; background-color: darkorange">
-            推荐阅读
+          <div style="height: auto;margin-top: 20px;margin-left: 15px">
+            48小时阅读排行：
+            <div v-for="(blog, index) in readNumMaxInTwoDaysBlogs" :key="blog.id">
+              <el-button type="text" style="color: black; font-weight: normal;font-size: 10px" @click="lookBlog(blog.id)"> {{index + 1}} &nbsp; {{getBlogTitle(blog.title)}}</el-button>
+
+            </div>
           </div>
         </div>
       </div>
@@ -145,6 +143,7 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      readNumMaxInTwoDaysBlogs: [],
       likeButtonDisabled: false,
       userLike: [],
       loading: false,
@@ -165,6 +164,14 @@ export default {
     };
   },
   computed: {
+    getBlogTitle() {
+      return (content) => {
+        if (content.length <= 16) {
+          return content;
+        }
+        return content.substring(0, 16) + "...";
+      };
+    },
     getBlogTitleWithEm() {
       return (title) => {
         // 将被<em>标签包裹的部分用<span>标签包裹，并设置为红色
@@ -207,6 +214,13 @@ export default {
 
   },
   methods: {
+    readNumMaxInTwoDays(){
+      this.$axios.get("blog/readNumMaxInTwoDays").then(res => {
+        if(res.data.code === 200){
+          this.readNumMaxInTwoDaysBlogs = res.data.data
+        }
+      })
+    },
     lookBlog(id) {
       this.$router.push({path: '/blog/lookBLog', query: {id: id}});
     },
@@ -301,6 +315,7 @@ export default {
     this.formInline.keyword = this.$route.query.keyword || ''; // 使用默认值为空字符串
     this.queryByKeyword();
     this.queryUserLikeBlog()
+    this.readNumMaxInTwoDays()
   },
 };
 </script>

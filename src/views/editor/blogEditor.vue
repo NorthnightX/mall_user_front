@@ -199,6 +199,9 @@
                 </div>
               </div>
               <div style="height: 1px;width: 100%;background-color: cornflowerblue;margin-top: 10px"></div>
+              <div v-if="deletedBlog.length === 0">
+                <h1>回收站是空的</h1>
+              </div>
               <div>
                 <div>
                   <div v-for="(blog, index) in deletedBlog" :key="blog.id">
@@ -380,7 +383,6 @@ export default {
         else{
           this.$message.warning("网络异常")
         }
-        this.recycleBinVisible = false
       })
     },
     allBlogType() {
