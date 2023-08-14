@@ -37,12 +37,24 @@
           <div style="display: flex; justify-content: space-between;">
             <!-- 编辑区的右侧工具栏 -->
             <div style="width: 13%; background-color: whitesmoke; margin-right: 10px;">
-              <div style="width: 100%;justify-content: center;align-items: center;display:flex;">
-                <el-button type="text" @click="addBLog()">新建博客</el-button>
+              <div style="width: 100%;justify-content: center;align-items: center;display:flex;flex-direction: column">
+                <div>
+                  <el-button type="text" @click="addBLog()">新建博客</el-button>
+                </div>
+                <div>
+                  <el-button type="text" @click="recycleBin()">回收站</el-button>
+                </div>
+                <div>
+                  <el-button type="text" @click="addBlogType()">新建分类</el-button>
+                </div>
+                <div>
+                  <el-button type="text" @click="allBlogType()">全部分类</el-button>
+                </div>
               </div>
             </div>
 
-            <div style="width: 80%; min-height: 580px; height: auto; margin: 0 3%" v-show="!editorBLog && !updateBLogVisible">
+            <div style="width: 80%; min-height: 580px; height: auto; margin: 0 3%"
+                 v-show="!editorBLog && !updateBLogVisible && !recycleBinVisible">
               <div style="margin-top: 15px;width: 100%;display: flex;justify-content: space-between;">
                 <div style="width: 30%;">
                   <span style="font-size: 13px">标题</span>
@@ -100,7 +112,7 @@
             </div>
 
             <div></div>
-            <!-- 编辑区 -->
+            <!-- 新建博客区 -->
             <div style="width: 80%; margin: 0 3%" v-show="editorBLog">
               <div style="margin-top: 1%">
                 <el-form>
@@ -164,7 +176,57 @@
                 </div>
               </div>
             </div>
-<!--            修改区-->
+            <!--            回收站-->
+            <div  v-show="recycleBinVisible"
+                 style="width: 80%; min-height: 580px; height: auto; margin: 0 3%">
+              <div style="margin-top: 15px;width: 100%;display: flex;justify-content: space-between;">
+                <div style="width: 30%;">
+                  <span style="font-size: 13px">标题</span>
+                </div>
+                <div style="display: flex; width: 70%;margin-left: 30%">
+                  <div style="width: 20%;align-items: center;display: flex;justify-content: center">
+                    <span style="font-size: 13px">发布时间</span>
+                  </div>
+                  <div style="width: 10%;align-items: center;display: flex;justify-content: center">
+                    <span style="font-size: 13px">评论数</span>
+                  </div>
+                  <div style="width: 10%;align-items: center;display: flex;justify-content: center">
+                    <span style="font-size: 13px">点击量</span>
+                  </div>
+                  <div style="width: 10%;align-items: center;display: flex;justify-content: center">
+                    <span style="font-size: 13px">操作</span>
+                  </div>
+                </div>
+              </div>
+              <div style="height: 1px;width: 100%;background-color: cornflowerblue;margin-top: 10px"></div>
+              <div>
+                <div>
+                  <div v-for="(blog, index) in deletedBlog" :key="blog.id">
+                    <div :style="{ display: 'flex', width: '100%', height: '35px', alignItems: 'center',
+                    justifyContent: 'space-between', backgroundColor: index % 2 === 1 ? '#f7f7f7' : 'transparent' }">
+                      <div class="blogTitle" style="width: 30%;">
+                        <span style="font-size: 12px">{{ blog.title }}</span>
+                      </div>
+                      <div style="display: flex; width: 70%;margin-left: 30%">
+                        <div style="width: 20%; align-items: center; display: flex; justify-content: center;">
+                          <span style="font-size: 12px">{{ blog.gmtCreate }}</span>
+                        </div>
+                        <div style="width: 10%; align-items: center; display: flex; justify-content: center;">
+                          <span style="font-size: 12px">{{ blog.comment }}</span>
+                        </div>
+                        <div style="width: 10%; align-items: center; display: flex; justify-content: center;">
+                          <span style="font-size: 12px">{{ blog.clickCount }}</span>
+                        </div>
+                        <div style="width: 10%; align-items: center; display: flex; justify-content: center;">
+                          <el-button type="text" size="small" @click="recoverBlog(blog)">恢复</el-button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--            修改区-->
             <div style="width: 80%; margin: 0 3%" v-show="updateBLogVisible">
               <div style="margin-top: 1%">
                 <el-form>
@@ -220,7 +282,8 @@
               </div>
               <div style="justify-content: left; display: flex; align-items: center; height: 50px">
                 <div>
-                  <el-button type="primary" style="background-color: #3366cc;" size="medium" @click="submitUpdateForm()">
+                  <el-button type="primary" style="background-color: #3366cc;" size="medium"
+                             @click="submitUpdateForm()">
                     提交
                   </el-button>
                   <el-button type="primary" style="background-color: #3366cc;" size="medium" @click="clearForm()">取消
@@ -239,6 +302,7 @@
             </div>
           </div>
         </div>
+        <!--        新建分类-->
         <el-dialog :visible.sync="addTypeFormVisible" width="30%" @click='closeDialog("edit")'>
           <el-form label-width="80px" ref="editAddTypeForm" :model="editAddTypeForm" :rules="rules">
             <el-form-item label="名称" prop="name">
@@ -269,6 +333,8 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      deletedBlog: [],
+      recycleBinVisible: false,
       blogs: [],
       updateBLogVisible: false,
       editorBLog: false,
@@ -303,23 +369,73 @@ export default {
   },
   computed: {},
   methods: {
-    addBLog(){
-      this.editorBLog = true
+    recoverBlog(blog){
+      this.$axios.put(`blog/recoverBlog`, blog).then(res => {
+        if(res.data.code === 200){
+          this.$message.success("修改成功")
+          setTimeout(() => {
+            this.queryBlogByUser(this.user.id)
+          }, 500);
+        }
+        else{
+          this.$message.warning("网络异常")
+        }
+        this.recycleBinVisible = false
+      })
     },
-    updateBLog(blog){
+    allBlogType() {
+
+    },
+    recycleBin() {
+      this.recycleBinVisible = true
+      this.editorBLog = false
+      this.updateBLogVisible = false
+      this.$axios.get(`blog/recycleBinBlog/${this.user.id}`).then(res => {
+          if(res.data.code === 200){
+            this.deletedBlog = res.data.data
+          }
+          else{
+            this.$message.warning("网络异常")
+          }
+      })
+    },
+    addBLog() {
+      this.editorBLog = true
+      this.recycleBinVisible = false
+      this.updateBLogVisible = false
+    },
+    updateBLog(blog) {
       this.updateBlogForm = {...blog}
       this.updateBLogVisible = true
     },
-    deleteBlog(id){
-      const confirmed = confirm('确认要取消吗？');
+    deleteBlog(id) {
+      const confirmed = confirm('确认要删除吗？');
       if (confirmed) {
-        console.log(id)
-
+        this.$axios.put(`/blog/deleteBlog/${id}`).then(res => {
+          if (res.data.code === 200) {
+            this.$message.success("删除成功,30天内可以通过回收在恢复该博客")
+            setTimeout(() => {
+              this.queryBlogByUser(this.user.id)
+            }, 500);
+          } else {
+            this.$message.warning("网络开小差了")
+          }
+        })
       }
     },
-    submitUpdateForm(){
-      console.log(this.updateBlogForm)
-      this.updateBLogVisible = false
+    submitUpdateForm() {
+      this.$axios.put("blog/updateBlog", this.updateBlogForm).then(res => {
+        if(res.data.code === 200){
+          this.$message.success("修改成功")
+          setTimeout(() => {
+            this.queryBlogByUser(this.user.id)
+          }, 500);
+        }
+        else{
+          this.$message.warning("网络异常")
+        }
+        this.updateBLogVisible = false
+      })
     },
     submitAddForm() {
       const user = JSON.parse(sessionStorage.getItem("token"));
