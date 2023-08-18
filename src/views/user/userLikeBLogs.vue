@@ -4,7 +4,7 @@
     <a id="top"></a>
     <div class="head" style="align-items: center; justify-content: center;display: flex; flex-direction: column; ">
       <div style="flex-direction: column;display: flex;align-items: center;justify-content: center;">
-        <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>NorthNightX</span></h1>
+        <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.user.nickName }}</span></h1>
         <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
       </div>
       <div class="arrow" :class="{ 'arrow-up': isArrowUp }" @click="scrollToContent">
@@ -66,6 +66,7 @@ import {marked} from 'marked';
 export default {
   data() {
     return {
+      user:"",
       loading: false,
       blogs:[] ,
       isArrowUp: false,
@@ -147,6 +148,7 @@ export default {
   },
   mounted() {
     let user = JSON.parse(sessionStorage.getItem("token"));
+    this.user = user
     this.queryLikeBlogByUser(user.id)
     // this.formatDate(this.blog.gmtCreate);
     // this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);

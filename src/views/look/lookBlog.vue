@@ -1,9 +1,24 @@
 <template>
 
-  <div class="container">
+  <div class="container" v-show="loading">
     <a id="top"></a>
-    <div class="head" style="align-items: center; justify-content: center;display: flex; flex-direction: column; ">
-      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>NorthNightX</span></h1>
+    <div v-if="blogImage.length > 0"  class="head" :style="{ alignItems : 'center', justifyContent: 'center',display: 'flex', flexDirection: 'column',
+   backgroundImage: `url(${blogImage})`} ">
+<!--    <div v-else class="head" style=" align-items : center; justify-content: center;display: flex;flex-direction: column; ">-->
+      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.user.nickName }}</span></h1>
+      <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
+
+
+      <div class="arrow" :class="{ 'arrow-up': isArrowUp }" @click="scrollToContent">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
+          <path d="M7 10l5 5 5-5z" />
+          <path d="M0 0h24v24H0z" fill="none" />
+        </svg>
+      </div>
+    </div>
+    <div v-else class="headNoImage" style="align-items : center; justify-content: center;display: flex; flex-direction: column; ">
+      <!--    <div v-else class="head" style=" align-items : center; justify-content: center;display: flex;flex-direction: column; ">-->
+      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.user.nickName }}</span></h1>
       <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
 
 
@@ -141,6 +156,8 @@ import {MessageBox} from "element-ui";
 export default {
   data() {
     return {
+      loading:false,
+      blogImage:"",
       deleteCommentForm:{
         userId:'',
         commentId:'',
@@ -175,6 +192,9 @@ export default {
     }
   },
   computed: {
+    url() {
+      return url
+    },
     markedContent() {
       marked.setOptions({
         highlight: (code, lang) => {
@@ -291,10 +311,10 @@ export default {
       this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
     queryBlogMsg(id){
-      console.log(id)
       this.$axios.get("blog/getBlogById/" + id).then(res => {
         if(res.data.code === 200){
           this.blog = res.data.data
+          this.blogImage = this.blog.image.length > 0 ? this.blog.image : "";
         } else {
           this.$message.warning("网络异常")
         }
@@ -322,7 +342,8 @@ export default {
       this.queryComment(this.blogById);
       setTimeout(() => {
         window.scrollTo(0, 0);
-      }, 50);
+        this.loading = true
+      }, 500);
     })
   },
 
@@ -495,14 +516,21 @@ body::-webkit-scrollbar-thumb:hover {
 }
 .head {
   width: 100%;
-  height: 100vh; /* 100% 屏幕高度，让背景图片铺满整个屏幕 */
+  height: 40vh; /* 100% 屏幕高度，让背景图片铺满整个屏幕 */
   background-size: cover; /* 缩放背景图片以覆盖整个容器 */
-  background-image: url("../../assets/img/3.jpg");
   background-position: center center; /* 将背景图片居中显示 */
   margin: 0; /* 去掉默认边距 */
   padding: 0; /* 去掉默认填充 */
 }
-
+.headNoImage{
+  background-image: url("../../assets/img/3.jpg");
+  background-position: center;
+  width: 100%;
+  height: 40vh; /* 100% 屏幕高度，让背景图片铺满整个屏幕 */
+  background-size: cover; /* 缩放背景图片以覆盖整个容器 */
+  margin: 0; /* 去掉默认边距 */
+  padding: 0; /* 去掉默认填充 */
+}
 
 .arrow {
   position: fixed;

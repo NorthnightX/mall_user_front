@@ -121,6 +121,11 @@
                   </el-form-item>
                 </el-form>
               </div>
+              <span style="color: #666666;font-size: 15px" >上传封面</span>
+              <div style="margin-top: 10px">
+                <el-avatar shape="square" :src="blogImage" :size="50" @click.native="openFileInput"></el-avatar>
+                <input type="file" ref="fileInput" style="display: none" @change="handleFileChange">
+              </div>
               <div style="margin-top: 10px;">
                 <span style="color: #666666">内容</span>
                 <el-form style="margin-top: 10px">
@@ -238,6 +243,11 @@
                   </el-form-item>
                 </el-form>
               </div>
+              <span style="color: #666666;font-size: 15px" >上传封面</span>
+              <div style="margin-top: 10px">
+                <el-avatar shape="square" :src="updateBlogForm.image" :size="50" @click.native="openFileInput"></el-avatar>
+                <input type="file" ref="fileInput" style="display: none" @change="handleFileChange">
+              </div>
               <div style="margin-top: 10px;">
                 <span style="color: #666666">内容</span>
                 <el-form style="margin-top: 10px">
@@ -336,6 +346,7 @@ export default {
   name: "BlogApp",
   data() {
     return {
+      blogImage: "",
       deletedBlog: [],
       recycleBinVisible: false,
       blogs: [],
@@ -355,6 +366,7 @@ export default {
         ]
       },
       guideDetail: {
+        image: '',
         content: '',
         title: '',
         typeId: '',
@@ -362,6 +374,7 @@ export default {
         isPublic: 1
       },
       updateBlogForm: {
+        image:'',
         content: '',
         title: '',
         typeId: '',
@@ -372,6 +385,25 @@ export default {
   },
   computed: {},
   methods: {
+    openFileInput() {
+      this.$refs.fileInput.click();
+    },
+    handleFileChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const formdata = new FormData();
+        formdata.append('image', file);
+        this.$axios.post('upload/uploadBlogImage', formdata).then(res => {
+          if (res.data.code === 200) {
+            var url = res.data.data;
+            this.blogImage = url;
+            this.guideDetail.image = url;
+          } else {
+            this.$message('网络异常');
+          }
+        });
+      }
+    },
     recoverBlog(blog){
       this.$axios.put(`blog/recoverBlog`, blog).then(res => {
         if(res.data.code === 200){
