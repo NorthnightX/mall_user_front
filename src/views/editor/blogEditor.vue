@@ -226,7 +226,7 @@
                           <span style="font-size: 12px">{{ blog.clickCount }}</span>
                         </div>
                         <div style="width: 10%; align-items: center; display: flex; justify-content: center;">
-                          <el-button type="text" size="small" @click="recoverBlog(blog)">恢复</el-button>
+                          <el-button type="text" size="small" @click="recoverBlog(blog.id)">恢复</el-button>
                         </div>
                       </div>
                     </div>
@@ -356,7 +356,6 @@ export default {
       editAddTypeForm: {
         name: "",
         isPublic: 1,
-        blogger: ''
       },
       addTypeFormVisible: false,
       types: [],
@@ -370,7 +369,6 @@ export default {
         content: '',
         title: '',
         typeId: '',
-        blogger: '',
         isPublic: 1
       },
       updateBlogForm: {
@@ -378,7 +376,6 @@ export default {
         content: '',
         title: '',
         typeId: '',
-        blogger: '',
         isPublic: 1
       },
     };
@@ -404,12 +401,13 @@ export default {
         });
       }
     },
-    recoverBlog(blog){
-      this.$axios.put(`blog/recoverBlog`, blog).then(res => {
+    recoverBlog(id){
+      this.$axios.put(`blog/recoverBlog/${id}`).then(res => {
         if(res.data.code === 200){
           this.$message.success("修改成功")
           setTimeout(() => {
-            this.queryBlogByUser(this.user.id)
+            this.queryBlogByUser()
+            this.recycleBinVisible = false
           }, 500);
         }
         else{
@@ -424,7 +422,7 @@ export default {
       this.recycleBinVisible = true
       this.editorBLog = false
       this.updateBLogVisible = false
-      this.$axios.get(`blog/recycleBinBlog/${this.user.id}`).then(res => {
+      this.$axios.get(`blog/recycleBinBlog`).then(res => {
           if(res.data.code === 200){
             this.deletedBlog = res.data.data
           }
@@ -449,7 +447,7 @@ export default {
           if (res.data.code === 200) {
             this.$message.success("删除成功,30天内可以通过回收在恢复该博客")
             setTimeout(() => {
-              this.queryBlogByUser(this.user.id)
+              this.queryBlogByUser()
             }, 500);
           } else {
             this.$message.warning("网络开小差了")
@@ -472,8 +470,6 @@ export default {
       })
     },
     submitAddForm() {
-      const user = JSON.parse(sessionStorage.getItem("token"));
-      this.editAddTypeForm.blogger = user.id
       this.$axios.post("/blogType/addType", this.editAddTypeForm).then(res => {
         if (res.data.code === 200) {
           this.selectTypeByLoginUser()
@@ -502,7 +498,6 @@ export default {
         this.guideDetail.content = '';
         this.guideDetail.title = '';
         this.guideDetail.typeId = '';
-        this.guideDetail.blogger = '';
         this.guideDetail.isPublic = 1;
         this.editorBLog = false
         this.updateBLogVisible = false
@@ -521,15 +516,16 @@ export default {
       })
     },
     submitForm() {
-      const user = JSON.parse(sessionStorage.getItem("token"));
-      this.guideDetail.blogger = user.id
       this.$axios.post("blog/addBlog", this.guideDetail).then(res => {
+        if(localStorage.getItem("token") == null){
+          this.$message.warning("请先登录")
+          return;
+        }
         if (res.data.code === 200) {
           this.$message.success("保存成功")
           this.guideDetail.content = '';
           this.guideDetail.title = '';
           this.guideDetail.typeId = '';
-          this.guideDetail.blogger = '';
           this.guideDetail.isPublic = 1;
           this.editorBLog = false
         } else {
@@ -538,8 +534,7 @@ export default {
       })
     },
     selectTypeByLoginUser() {
-      const user = JSON.parse(sessionStorage.getItem("token"));
-      this.$axios.get("blogType/getTypeByUser/" + user.id).then(res => {
+      this.$axios.get("blogType/getTypeByUser").then(res => {
         if (res.data.code === 200) {
           this.types = res.data.data
         } else {
@@ -547,8 +542,8 @@ export default {
         }
       })
     },
-    queryBlogByUser(id) {
-      this.$axios.get("blog/blogByUser/" + id).then(res => {
+    queryBlogByUser() {
+      this.$axios.get("blog/blogByUser").then(res => {
         if (res.data.code === 200) {
           this.blogs = res.data.data;
           this.loading = true
@@ -559,8 +554,8 @@ export default {
     }
   },
   created() {
-    this.user = JSON.parse(sessionStorage.getItem("token"))
-    this.queryBlogByUser(this.user.id)
+    this.user = JSON.parse(localStorage.getItem("user"))
+    this.queryBlogByUser()
     this.selectTypeByLoginUser()
   }
 };

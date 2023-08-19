@@ -148,12 +148,11 @@ export default {
       userLike: [],
       loading: false,
       showPagination: true,
-      userImage: JSON.parse(sessionStorage.getItem("token")).image,
+      userImage: '',
       formInline: {
         keyword: ""
       },
       editBlogForm: {
-        userId: "",
         isLike: 1,
         blogId: ''
       },
@@ -233,14 +232,15 @@ export default {
       }
     },
     likeBlog(id) {
+      if(localStorage.getItem("token") == null){
+        return;
+      }
       if (this.likeButtonDisabled) {
         this.$message.warning("您点的太快了")
         return; // 如果按钮已禁用，不执行操作
       }
       this.likeButtonDisabled = true; // 禁用按钮
       this.editBlogForm.blogId = id
-      let user = JSON.parse(sessionStorage.getItem("token"))
-      this.editBlogForm.userId = user.id;
       this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
         if (res.data.code === 200) {
           this.$message.success(res.data.data);
@@ -265,12 +265,10 @@ export default {
       })
     },
     queryUserLikeBlog() {
-      let user = JSON.parse(sessionStorage.getItem("token"))
-      this.$axios.get("isLike/queryLikeByUser", {
-        params: {
-          userId: user.id
-        }
-      }).then(res => {
+      if(localStorage.getItem("token") == null){
+        return;
+      }
+      this.$axios.get("isLike/queryLikeByUser").then(res => {
         if (res.data.code === 200) {
           this.userLike = res.data.data
         } else {
@@ -286,6 +284,12 @@ export default {
     handleCurrentChange(val) {
       this.pageNum = val
       this.queryByKeyword()
+    },
+    setImage(){
+      if(localStorage.getItem("token") == null){
+        this.userImage = ""
+      }
+      else this.userImage = JSON.parse(localStorage.getItem("user")).image
     },
     queryByKeyword() {
       this.$axios.get("blog/queryByKeyword", {
@@ -313,6 +317,7 @@ export default {
   created() {
     // 当组件创建时，调用获取博客列表的函数
     this.formInline.keyword = this.$route.query.keyword || ''; // 使用默认值为空字符串
+    this.setImage()
     this.queryByKeyword();
     this.queryUserLikeBlog()
     this.readNumMaxInTwoDays()

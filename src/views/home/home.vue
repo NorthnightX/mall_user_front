@@ -29,7 +29,8 @@
             <el-button type="text" style="margin-left: 10px;margin-right: 20px" class="iconfont icon-bianji"
                        @click="editorBlog()">
             </el-button>
-            <el-button type="text" @click.native="findMyBLog()" style="margin-left: 10px ;margin-right: 20px" class="iconfont icon-bokeyuan">
+            <el-button type="text" @click.native="findMyBLog()" style="margin-left: 10px ;margin-right: 20px"
+                       class="iconfont icon-bokeyuan">
             </el-button>
             <el-button type="text" style="margin-left: 10px; margin-right: 20px" class="iconfont icon-xiaoxi">
             </el-button>
@@ -52,10 +53,13 @@
           <!--        右边栏-->
           <div style="width: 15%; background-color: #fcfcfc">
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
-              <el-button type="text" style="color: black;margin-left: 12px" class="iconfont icon-fenlei">&nbsp 分类</el-button>
+              <el-button type="text" style="color: black;margin-left: 12px" class="iconfont icon-fenlei">&nbsp 分类
+              </el-button>
               <el-button type="text" style="color: black" class="iconfont icon-dingyuehao">&nbsp 订阅</el-button>
               <el-button type="text" style="color: black" class="iconfont icon-guanzhu">&nbsp 关注</el-button>
-              <el-button type="text" style="color: black" class="iconfont icon-dianzan" @click="userLikeBlogs()">&nbsp 点赞</el-button>
+              <el-button type="text" style="color: black" class="iconfont icon-dianzan" @click="userLikeBlogs()">&nbsp
+                点赞
+              </el-button>
               <el-button type="text" style="color: black" class="iconfont icon-pinglun">&nbsp 评论</el-button>
               <el-button type="text" style="color: black" class="iconfont icon-gengduo">&nbsp 更多</el-button>
               <el-button type="text" style="color: black" class="iconfont icon-wentifankui">&nbsp 反馈</el-button>
@@ -123,13 +127,15 @@
             <div style="height: auto;margin-top: 20px;margin-left: 15px">
               48小时阅读排行：
               <div v-for="(blog, index) in readNumMaxInTwoDaysBlogs" :key="blog.id">
-                <el-button type="text" style="color: black; font-weight: normal;font-size: 10px" @click="lookBlog(blog.id)"> {{index + 1}} &nbsp; {{getBlogTitle(blog.title)}}</el-button>
+                <el-button type="text" style="color: black; font-weight: normal;font-size: 10px"
+                           @click="lookBlog(blog.id)"> {{ index + 1 }} &nbsp; {{ getBlogTitle(blog.title) }}
+                </el-button>
 
               </div>
             </div>
             <div style="margin-top: 10px">
               <span style="font-weight: bold;margin-left: 10px;
-              font-family: LongCang-Regular, cursive;">今日活跃用户：{{this.loginCount}}</span>
+              font-family: LongCang-Regular, cursive;">今日活跃用户：{{ this.loginCount }}</span>
             </div>
           </div>
         </div>
@@ -162,12 +168,11 @@ export default {
       likeButtonDisabled: false,
       loading: false,
       loginCount: '',
-      userImage: JSON.parse(sessionStorage.getItem("token")).image,
+      userImage: '',
       formInline: {
         keyword: ""
       },
       editBlogForm: {
-        userId: "",
         isLike: 1,
         blogId: ''
       },
@@ -205,68 +210,79 @@ export default {
     },
   },
   methods: {
-    userLikeBlogs(){
-      this.$router.push({path: '/user/likeBLogs'})
+    userLikeBlogs() {
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else this.$router.push({path: '/user/likeBLogs'})
     },
     countSetUp() {
-      this.$router.push({path: '/user/userEditor'})
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else this.$router.push({path: '/user/userEditor'})
     },
     logout() {
-      MessageBox.confirm('确定要注销吗？', '确认注销', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-            // 用户点击了确定按钮
-            sessionStorage.clear();
-            this.$router.push({path: '/login'});
-          })
-          .catch(() => {
-
-          });
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else {
+        MessageBox.confirm('确定要注销吗？', '确认注销', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // 用户点击了确定按钮
+          localStorage.removeItem("token")
+          localStorage.removeItem("user")
+          this.$router.push({path: '/login'});
+        })
+      }
     },
     findMyBLog() {
-
-      this.$router.push({path: '/blog/userBlog'})
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else this.$router.push({path: '/blog/userBlog'})
     },
     editorBlog() {
-      this.$router.push({path: '/blog/blogEditor'})
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else this.$router.push({path: '/blog/blogEditor'})
     },
     lookBlog(id) {
       this.$router.push({path: '/blog/lookBLog', query: {id: id}});
     },
     likeBlog(id) {
-      if (this.likeButtonDisabled) {
-        this.$message.warning("您点的太快了")
-        return;
-      }
-      this.likeButtonDisabled = true
-      this.editBlogForm.blogId = id
-      let user = JSON.parse(sessionStorage.getItem("token"))
-      this.editBlogForm.userId = user.id;
-      this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
-        if (res.data.code === 200) {
-          this.$message.success(res.data.data);
-          this.pageNum = 1;
-          this.queryUserLikeBlog()
-          // 根据返回的信息增减点赞数以及更新 blogs 中对应博客的点赞信息
-          const blogIndex = this.blogs.findIndex(blog => blog.id === id);
-          if (blogIndex !== -1) {
-            if (res.data.data === "点赞成功") {
-              this.blogs[blogIndex].likeCount++; // 增加点赞数
-            } else {
-              this.blogs[blogIndex].likeCount--; // 减少点赞数
-            }
-          }
-          setTimeout(() => {
-            this.pageNum = 1;
-            this.queryAll()
-            this.likeButtonDisabled = false
-          }, 1000);
-        } else {
-          this.$message.warning("网络异常")
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else {
+        if (this.likeButtonDisabled) {
+          this.$message.warning("您点的太快了")
+          return;
         }
-      })
+        this.likeButtonDisabled = true
+        this.editBlogForm.blogId = id
+        this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
+          if (res.data.code === 200) {
+            this.$message.success(res.data.data);
+            this.pageNum = 1;
+            this.queryUserLikeBlog()
+            // 根据返回的信息增减点赞数以及更新 blogs 中对应博客的点赞信息
+            const blogIndex = this.blogs.findIndex(blog => blog.id === id);
+            if (blogIndex !== -1) {
+              if (res.data.data === "点赞成功") {
+                this.blogs[blogIndex].likeCount++; // 增加点赞数
+              } else {
+                this.blogs[blogIndex].likeCount--; // 减少点赞数
+              }
+            }
+            setTimeout(() => {
+              this.pageNum = 1;
+              this.queryAll()
+              this.likeButtonDisabled = false
+            }, 1000);
+          } else {
+            this.$message.warning("网络异常")
+          }
+        })
+      }
     },
     // 处理每页显示数量的变化
     handleSizeChange(val) {
@@ -281,12 +297,10 @@ export default {
       this.$router.push({path: '/blog/search', query: {keyword: this.formInline.keyword}});
     },
     queryUserLikeBlog() {
-      let user = JSON.parse(sessionStorage.getItem("token"))
-      this.$axios.get("isLike/queryLikeByUser", {
-        params: {
-          userId: user.id
-        }
-      }).then(res => {
+      if (localStorage.getItem("token") == null) {
+        return;
+      }
+      this.$axios.get("isLike/queryLikeByUser").then(res => {
         if (res.data.code === 200) {
           this.userLike = res.data.data
         } else {
@@ -312,18 +326,25 @@ export default {
         }
       })
     },
-    readNumMaxInTwoDays(){
+    readNumMaxInTwoDays() {
       this.$axios.get("blog/readNumMaxInTwoDays").then(res => {
-          if(res.data.code === 200){
-            this.readNumMaxInTwoDaysBlogs = res.data.data
-          }
+        if (res.data.code === 200) {
+          this.readNumMaxInTwoDaysBlogs = res.data.data
+        }
       })
     },
-    getActiveUserToday(){
+    setUserImage() {
+      if (localStorage.getItem("token") == null) {
+        this.userImage = ""
+      } else {
+        JSON.parse(localStorage.getItem("user")).image
+      }
+    },
+    getActiveUserToday() {
       this.$axios.get("user/getActiveUserToday").then(res => {
-          if(res.data.code === 200){
-            this.loginCount = res.data.data
-          }
+        if (res.data.code === 200) {
+          this.loginCount = res.data.data
+        }
       })
     }
   },
@@ -333,6 +354,7 @@ export default {
     this.queryUserLikeBlog()
     this.getActiveUserToday()
     this.readNumMaxInTwoDays()
+    this.setUserImage()
   },
 };
 </script>

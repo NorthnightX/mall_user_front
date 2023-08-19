@@ -66,18 +66,18 @@ const router = new VueRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  if (to.path === '/' || to.path === '/reg' || to.path === '/login') {
-    return next()
-  } else {
-    let user = sessionStorage.getItem('token')
-    if (user != null) {
-      //校验token
-      return next()
-    } else {
-      Message.error('用户未登录')
-      return next('/')
-    }
-  }
-})
+// router.beforeEach((to, from, next) => {
+//   if (to.path === '/' || to.path === '/reg' || to.path === '/login') {
+//     return next()
+//   } else {
+//     let user = localStorage.getItem('token')
+//     if (user != null) {
+//       //校验token
+//       return next()
+//     } else {
+//       Message.error('用户未登录')
+//       return next('/')
+//     }
+//   }
+// })
 export default router

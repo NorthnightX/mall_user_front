@@ -63,6 +63,7 @@
 </template>
 <script>
 import {marked} from 'marked';
+
 export default {
   data() {
     return {
@@ -134,8 +135,8 @@ export default {
       const days = Math.floor(hours / 24);
       this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
-    queryLikeBlogByUser(id){
-      this.$axios.get("blog/userLikeBlogs/" + id).then(res => {
+    queryLikeBlogByUser(){
+      this.$axios.get("blog/userLikeBlogs").then(res => {
         if(res.data.code === 200){
           this.blogs = res.data.data;
           this.loading = true
@@ -147,14 +148,12 @@ export default {
     }
   },
   mounted() {
-    let user = JSON.parse(sessionStorage.getItem("token"));
-    this.user = user
-    this.queryLikeBlogByUser(user.id)
+    this.user = JSON.parse(localStorage.getItem("user"))
+    this.queryLikeBlogByUser()
     // this.formatDate(this.blog.gmtCreate);
     // this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
     window.addEventListener('scroll', this.handleScroll);
     this.$nextTick(() => {
-      this.queryComment(this.blogById);
       setTimeout(() => {
         window.scrollTo(0, 0);
       }, 50);

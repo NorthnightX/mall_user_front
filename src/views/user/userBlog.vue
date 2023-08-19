@@ -64,6 +64,7 @@
 </template>
 <script>
 import {marked} from 'marked';
+
 export default {
   data() {
     return {
@@ -138,8 +139,12 @@ export default {
       const days = Math.floor(hours / 24);
       this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
-    queryBlogByUser(id){
-      this.$axios.get("blog/blogByUser/" + id).then(res => {
+    queryBlogByUser(){
+      if(localStorage.getItem("token") == null){
+        this.$message.warning("请先登录")
+        return;
+      }
+      this.$axios.get("blog/blogByUser").then(res => {
         if(res.data.code === 200){
           this.blogs = res.data.data;
           this.loading = true
@@ -151,14 +156,12 @@ export default {
     }
   },
   mounted() {
-    let user = JSON.parse(sessionStorage.getItem("token"));
-    this.user = user
-    this.queryBlogByUser(user.id)
+    this.user = JSON.parse(localStorage.getItem("user"))
+    this.queryBlogByUser()
     // this.formatDate(this.blog.gmtCreate);
     // this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
     window.addEventListener('scroll', this.handleScroll);
     this.$nextTick(() => {
-      this.queryComment(this.blogById);
       setTimeout(() => {
         window.scrollTo(0, 0);
       }, 50);

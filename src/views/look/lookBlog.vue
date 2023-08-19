@@ -5,7 +5,7 @@
     <div v-if="blogImage.length > 0"  class="head" :style="{ alignItems : 'center', justifyContent: 'center',display: 'flex', flexDirection: 'column',
    backgroundImage: `url(${blogImage})`} ">
 <!--    <div v-else class="head" style=" align-items : center; justify-content: center;display: flex;flex-direction: column; ">-->
-      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.user.nickName }}</span></h1>
+      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.blog.bloggerName}}</span></h1>
       <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
 
 
@@ -18,7 +18,7 @@
     </div>
     <div v-else class="headNoImage" style="align-items : center; justify-content: center;display: flex; flex-direction: column; ">
       <!--    <div v-else class="head" style=" align-items : center; justify-content: center;display: flex;flex-direction: column; ">-->
-      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.user.nickName }}</span></h1>
+      <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.blog.bloggerName }}</span></h1>
       <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
 
 
@@ -127,7 +127,7 @@
                 </div>
                 <div>
                   <el-button  type="text"  style="color: #3366cc;font-size: 10px"
-                              v-show="blog.bloggerId === user.id || comment.userId === user.id"
+                              v-show="user != null && (blog.bloggerId === user.id || comment.userId === user.id)"
                               @click="deleteComment(comment.id)">删除</el-button>
                 </div>
               </div>
@@ -159,7 +159,6 @@ export default {
       loading:false,
       blogImage:"",
       deleteCommentForm:{
-        userId:'',
         commentId:'',
         blogId:''
       },
@@ -178,13 +177,11 @@ export default {
       comments:[],
       blogById: '',
       editBlogForm: {
-        userId: "",
         isLike: 1,
         blogId:''
       },
       commentForm: {
         comment:'',
-        userId:'',
         blogId:''
       },
       intervalId: null,
@@ -217,9 +214,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        let userId = this.user.id;
         this.deleteCommentForm.commentId = id
-        this.deleteCommentForm.userId = userId
         this.deleteCommentForm.blogId = this.blog.id
         this.$axios.put(("/comment/deleteComment"), this.deleteCommentForm).then(res => {
           if(res.data.code === 200){
@@ -237,37 +232,26 @@ export default {
     goToHome() {
       this.$router.push('/blog/home');
     },
-    likeBlog(id) {
-      this.editBlogForm.blogId = id
-      let user = JSON.parse(sessionStorage.getItem("token"))
-      this.editBlogForm.userId = user.id;
-      this.$axios.post("isLike/likeBlog", this.editBlogForm).then(res => {
-        if (res.data.code === 200) {
-          this.pageNum = 1
-          this.queryAll()
-          this.queryUserLikeBlog()
-          this.$message.success("修改成功");
-        } else {
-          this.$message.warning("网络异常")
-        }
-      })
-    },
     submitComment(){
-      const user = JSON.parse(sessionStorage.getItem("token"));
-      this.commentForm.userId = user.id
-      this.commentForm.blogId = this.blog.id
-      this.$axios.post("comment/addComment", this.commentForm).then(res => {
-        if(res.data.code === 200){
-          this.commentForm.comment = ""
-          this.$message.success("评论成功")
-          setTimeout(() => {
-            this.queryComment(this.blogById)
-          }, 1000);
-        }
-        else {
-          this.$message.warning("网络异常")
-        }
-      })
+      if(localStorage.getItem("token") == null){
+        this.$router.push('/');
+      }
+      else {
+        this.commentForm.blogId = this.blog.id
+        this.$axios.post("comment/addComment", this.commentForm).then(res => {
+          if(res.data.code === 200){
+            this.commentForm.comment = ""
+            this.$message.success("评论成功")
+            setTimeout(() => {
+              this.queryComment(this.blogById)
+            }, 1000);
+          }
+          else {
+            this.$message.warning("网络异常")
+          }
+        })
+      }
+
     },
     $imgAdd(pos, $file) {
       var formdata = new FormData();
@@ -315,6 +299,9 @@ export default {
         if(res.data.code === 200){
           this.blog = res.data.data
           this.blogImage = this.blog.image.length > 0 ? this.blog.image : "";
+          if(localStorage.getItem("token") != null){
+            this.user = JSON.parse(localStorage.getItem("user"))
+          }
         } else {
           this.$message.warning("网络异常")
         }
@@ -334,7 +321,6 @@ export default {
   mounted() {
     this.blogById = this.$route.query.id || "";
     this.queryBlogMsg(this.blogById)
-    this.user = JSON.parse(sessionStorage.getItem("token"))
     this.formatDate(this.blog.gmtCreate);
     this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
     window.addEventListener('scroll', this.handleScroll);

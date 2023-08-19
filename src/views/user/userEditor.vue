@@ -91,7 +91,6 @@ export default {
       userImage: "",
       formData: {
         field:"",
-        id:'',
         image: '',
         name: '',
         password: "",
@@ -127,6 +126,10 @@ export default {
       }
     },
     updateUser(){
+      if(localStorage.getItem("token") == null){
+        this.$message.warning("请先登录")
+        return;
+      }
       this.$axios.put("/user/update", this.formData).then(res => {
         if(res.data.code === 200){
           this.queryLoginUser()
@@ -138,10 +141,9 @@ export default {
       })
     },
     queryLoginUser(){
-      let id = this.userMsg.id
-      this.$axios.get("/user/getLoginUser/" + id).then(res => {
+      this.$axios.get("/user/getLoginUser").then(res => {
         if(res.data.code === 200){
-          sessionStorage.setItem("token", JSON.stringify(res.data.data));
+          localStorage.setItem("user", JSON.stringify(res.data.data))
         }
         else{
           this.$message.warning("网络异常")
@@ -161,15 +163,16 @@ export default {
       // 处理按钮2的点击事件
     },
     getAvatar() {
-      let user = JSON.parse(sessionStorage.getItem("token"))
-      this.userMsg = user
-      this.userImage = user.image
+      let user = JSON.parse(localStorage.getItem("user"))
       this.formData = {...user}
-      console.log(this.formData)
+      this.userImage = user.image
     }
   },
   created() {
+    this.queryLoginUser()
     this.getAvatar();
+
+
   }
 };
 </script>
