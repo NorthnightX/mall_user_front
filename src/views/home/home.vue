@@ -337,7 +337,7 @@ export default {
       if (localStorage.getItem("token") == null) {
         this.userImage = ""
       } else {
-        JSON.parse(localStorage.getItem("user")).image
+        this.userImage = JSON.parse(localStorage.getItem("user")).image
       }
     },
     getActiveUserToday() {
