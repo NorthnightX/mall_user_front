@@ -32,7 +32,7 @@
             <el-button type="text" @click.native="findMyBLog()" style="margin-left: 10px ;margin-right: 20px"
                        class="iconfont icon-bokeyuan">
             </el-button>
-            <el-button type="text" style="margin-left: 10px; margin-right: 20px" class="iconfont icon-xiaoxi">
+            <el-button type="text" @click.native="myMessage()" style="margin-left: 10px; margin-right: 20px" class="iconfont icon-xiaoxi">
             </el-button>
             <div style="margin-bottom: 6px">
               <el-dropdown trigger="hover">
@@ -210,6 +210,11 @@ export default {
     },
   },
   methods: {
+    myMessage(){
+      if (localStorage.getItem("token") == null) {
+        this.$router.push({path: '/'})
+      } else this.$router.push({path: '/user/userMessage'})
+    },
     userLikeBlogs() {
       if (localStorage.getItem("token") == null) {
         this.$router.push({path: '/'})

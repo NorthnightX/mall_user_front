@@ -53,6 +53,11 @@ const routes = [
     path: '/user/likeBLogs',
     name: 'userLikeBLogs',
     component:  () => import("../views/user/userLikeBLogs.vue")
+  },
+  {
+    path: '/user/userMessage',
+    name: 'userMessage',
+    component: () => import("../views/user/userMsg.vue")
   }
 ]
 

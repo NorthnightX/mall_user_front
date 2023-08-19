@@ -2,13 +2,10 @@
 
   <div class="container" v-show="loading">
     <a id="top"></a>
-    <div v-if="blogImage.length > 0"  class="head" :style="{ alignItems : 'center', justifyContent: 'center',display: 'flex', flexDirection: 'column',
+    <div v-if="blogImage.length > 0"  class="headBlog" :style="{ alignItems : 'center', justifyContent: 'center',display: 'flex', flexDirection: 'column',
    backgroundImage: `url(${blogImage})`} ">
-<!--    <div v-else class="head" style=" align-items : center; justify-content: center;display: flex;flex-direction: column; ">-->
       <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.blog.bloggerName}}</span></h1>
       <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
-
-
       <div class="arrow" :class="{ 'arrow-up': isArrowUp }" @click="scrollToContent">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
           <path d="M7 10l5 5 5-5z" />
@@ -17,7 +14,6 @@
       </div>
     </div>
     <div v-else class="headNoImage" style="align-items : center; justify-content: center;display: flex; flex-direction: column; ">
-      <!--    <div v-else class="head" style=" align-items : center; justify-content: center;display: flex;flex-direction: column; ">-->
       <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.blog.bloggerName }}</span></h1>
       <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
 
@@ -500,7 +496,7 @@ body::-webkit-scrollbar-thumb:hover {
 .footer-links a:hover {
   color: #3a8ee6;
 }
-.head {
+.headBlog {
   width: 100%;
   height: 40vh; /* 100% 屏幕高度，让背景图片铺满整个屏幕 */
   background-size: cover; /* 缩放背景图片以覆盖整个容器 */

@@ -5,14 +5,6 @@
     <div class="head" style="align-items: center; justify-content: center;display: flex; flex-direction: column; ">
       <h1 style="color: white ;font-family: Playball, cursive ;font-size: 3rem"><span>{{ this.user.nickName }}</span></h1>
       <h2 style="color: white ;font-family: LongCang-Regular, cursive ;font-size: 1.5rem; margin-top: -20px">不想做选择</h2>
-
-
-      <div class="arrow" :class="{ 'arrow-up': isArrowUp }" @click="scrollToContent">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48">
-          <path d="M7 10l5 5 5-5z" />
-          <path d="M0 0h24v24H0z" fill="none" />
-        </svg>
-      </div>
     </div>
 
     <el-button class="custom-button" @click="goToHome()">HOME</el-button>
@@ -63,28 +55,15 @@
   </div>
 </template>
 <script>
-import {marked} from 'marked';
-
 export default {
   data() {
     return {
       user: "",
       loading: false,
       blogs:[] ,
-      isArrowUp: false,
-      offset: 200,
-
-      intervalId: null,
-      formattedCreationTime: null,
     }
   },
   computed: {
-    editorBlog() {
-      this.$router.push({path: '/blog/blogEditor'})
-    },
-    renderedMarkdown() {
-      return (content) => marked(content);
-    },
     formattedCreationTime() {
       return this.formatDate(this.blog.gmtCreate);
     },
@@ -105,39 +84,14 @@ export default {
     },
   },
   methods: {
+    editorBlog() {
+      this.$router.push({path: '/blog/blogEditor'})
+    },
     goToHome() {
       this.$router.push('/blog/home');
     },
     lookBlog(id) {
       this.$router.push({path: '/blog/lookBLog', query: {id: id}});
-    },
-    handleScroll() {
-      const contentSection = document.querySelector('.blog-content');
-      if (contentSection) {
-        const contentRect = contentSection.getBoundingClientRect();
-        const contentMiddle = contentRect.top + contentRect.height / 2;
-        this.isArrowUp = window.scrollY >= contentMiddle - this.offset;
-      }
-    },
-    scrollToContent() {
-      const contentSection = document.querySelector('.blog-content');
-      if (contentSection) {
-        contentSection.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }
-    },
-    // 展示时间格式
-    formatDate(dateString) {
-      const creationTime = new Date(dateString);
-      const currentTime = new Date();
-      const timeDifference = currentTime - creationTime;
-      const seconds = Math.floor(timeDifference / 1000);
-      const minutes = Math.floor(seconds / 60);
-      const hours = Math.floor(minutes / 60);
-      const days = Math.floor(hours / 24);
-      this.formattedCreationTime = `${days} d ${hours % 24} h ${minutes % 60} m ${seconds % 60} s`;
     },
     queryBlogByUser(){
       if(localStorage.getItem("token") == null){
@@ -158,29 +112,12 @@ export default {
   mounted() {
     this.user = JSON.parse(localStorage.getItem("user"))
     this.queryBlogByUser()
-    // this.formatDate(this.blog.gmtCreate);
-    // this.intervalId = setInterval(() => this.formatDate(this.blog.gmtCreate), 1000);
-    window.addEventListener('scroll', this.handleScroll);
-    this.$nextTick(() => {
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 50);
-    })
-    const topAnchor = document.getElementById('top');
-    if (topAnchor) {
-      topAnchor.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }
   },
 
   created() {
   },
 
   beforeDestroy() {
-    // clearInterval(this.intervalId);
-    window.removeEventListener('scroll', this.handleScroll);
   },
 };
 </script>
@@ -244,43 +181,6 @@ export default {
   font-size: 36px;
   font-weight: bold;
   margin-bottom: 10px;
-}
-
-.blog-date {
-  font-size: 14px;
-  color: #888;
-}
-
-.user-section {
-  height: 150px;
-  width: 100%;
-  margin-top: 10px;
-  background-color: white;
-  border-radius: 10px; /* Add rounded corners */
-  transition: background-color 0.3s ease-in-out; /* Add transition effect */
-}
-
-.gray-hr {
-  border: none;
-  border-top: 1px solid #ccc;
-  margin: 0;
-  margin-top: 10px;
-  width: 100%;
-}
-
-.comment-section {
-  margin-top: 40px;
-  height: 100px;
-  width: 100%;
-  background-color: white;
-  border-radius: 10px; /* Add rounded corners */
-  transition: background-color 0.3s ease-in-out; /* Add transition effect */
-}
-
-.blog-content {
-  padding: 20px;
-  line-height: 1.6;
-  text-align: justify;
 }
 
 /* 添加阴影过渡效果 */
@@ -359,15 +259,6 @@ body::-webkit-scrollbar-thumb:hover {
   padding: 0; /* 去掉默认填充 */
 }
 
-
-.arrow {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  cursor: pointer;
-  z-index: 999;
-  transition: transform 0.2s;
-}
 
 .arrow svg {
   width: 48px;
