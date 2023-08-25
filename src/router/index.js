@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import {Message} from 'element-ui';
-import login from '../views/login/loginBlog.vue';
+import login from '../views/login/loginMall.vue';
 Vue.use(VueRouter)
 
 const routes = [
@@ -17,52 +17,42 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('../views/login/loginBlog.vue')
+    component: () => import('../views/login/loginMall.vue')
   },
   {
-    path: '/blog/home',
+    path: '/mall/home',
     name: 'home',
-    component: () => import('../views/home/home.vue')
+    component: () => import('../views/home/mallHome.vue')
   },
   {
-    path: '/blog/search',
+    path: '/mall/search',
     name: 'search',
-    component:  () => import("../views/search/searchPage.vue")
+    component:  () => import("../views/search/searchProduct.vue")
   },
   {
-    path: '/blog/lookBlog',
-    name: 'lookBlog',
-    component:  () => import("../views/look/lookBlog.vue")
+    path: '/mall/lookProduct',
+    name: 'lookProduct',
+    component:  () => import("../views/look/productMessage.vue")
   },
   {
-    path: '/blog/blogEditor',
-    name: 'blogEditor',
-    component:  () => import("../views/editor/blogEditor.vue")
+    path: '/mall/cart',
+    name: 'cart',
+    component:  () => import("../views/cart/cart.vue")
   },
   {
-    path: '/blog/userBlog',
-    name: 'userBlog',
-    component:  () => import("../views/user/userBlog.vue")
+    path: '/mall/pay',
+    name: 'pay',
+    component:  () => import("../views/pay/pay.vue")
   },
-  {
-    path: '/user/userEditor',
-    name: 'userEditor',
-    component:  () => import("../views/user/userEditor.vue")
-  },
-  {
-    path: '/user/likeBLogs',
-    name: 'userLikeBLogs',
-    component:  () => import("../views/user/userLikeBLogs.vue")
-  },
-  {
-    path: '/user/userMessage',
-    name: 'userMessage',
-    component: () => import("../views/user/userMsg.vue")
-  }
 ]
 
 
 
+const originalPush = VueRouter.prototype.push
+
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch(err => err)
+}
 
 
 const router = new VueRouter({

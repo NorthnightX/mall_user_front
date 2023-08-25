@@ -29,18 +29,18 @@ new Vue({
 }).$mount('#app')
 axios.interceptors.request.use(
     config => {
-      let token = localStorage.getItem("token");
-      if(token) config.headers.authorization = token
-      return config
+        let token = localStorage.getItem("token");
+        if(token) config.headers.authorization = token
+        return config
     }
 )
 axios.interceptors.response.use(
     response => {
-      // 检查是否需要清除 Session Storage 中的 token
-      const token= response.headers["authorization"];
-      if (token != null) {
-        localStorage.setItem("token", token)
-      }
-      return response;
+        // 检查是否需要清除 Session Storage 中的 token
+        const token= response.headers["authorization"];
+        if (token != null) {
+            localStorage.setItem("token", token)
+        }
+        return response;
     }
 );

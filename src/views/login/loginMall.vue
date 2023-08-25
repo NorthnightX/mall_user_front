@@ -4,7 +4,7 @@
       <div class="loginTitle">登录</div>
       <el-form :model="loginForm" ref="loginForm" :rules="loginRules">
         <el-form-item prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
+          <el-input v-model="loginForm.phone" placeholder="请输入手机号"></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <el-input type="password"  show-password v-model="loginForm.password" placeholder="请输入密码"></el-input>
@@ -71,7 +71,7 @@ export default {
       url:'',
       redisKey:'',
       loginRules:{
-        username: [ {required: true, message: '请填写用户名', trigger: 'blur'}],
+        phone: [ {required: true, message: '请填写手机号', trigger: 'blur'}],
         password: [
           {required: true, message: '请输入密码', trigger: 'blur'},
           { min: 4, max: 12, message: '长度在 5 到 12 个字符', trigger: 'blur' }
@@ -86,7 +86,7 @@ export default {
         password:'',
       },
       loginForm:{
-        username:'',
+        phone:'',
         password:'',
         code:'',
         codeKey:''
@@ -109,12 +109,12 @@ export default {
       this.$refs[formName].validate(valid=>{
         if(valid){
           this.loginForm.codeKey = this.redisKey
-          this.$axios.post('/user/login',this.loginForm).then(res =>{
+          this.$axios.post('/user/userLogin',this.loginForm).then(res =>{
             if(res.data.code === 200){
               this.$message.success("登陆成功")
               localStorage.setItem('token', res.data.data.token)
-              localStorage.setItem('user', JSON.stringify(res.data.data.userDTO))
-              this.$router.push('/blog/home')
+              localStorage.setItem('user', res.data.data.user)
+              this.$router.push('/mall/home')
             }else {
               this.$message.error(res.data.message)
             }
@@ -128,7 +128,7 @@ export default {
     getCode(){
       clearInterval(this.interval)
       this.time=60
-      this.$axios.get('/user/verificationCode').then(res =>{
+      this.$axios.get('/user/getVerification').then(res =>{
         if(res.data.code === 200){
           this.url = res.data.data.base64Str
           this.redisKey = res.data.data.redisKey

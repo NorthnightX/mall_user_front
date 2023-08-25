@@ -18,7 +18,7 @@
     "markdown-it": "^13.0.1",
     "markdown-it-for-inline": "^0.1.1",
     "markdown-wasm": "^1.2.0",
-    "marked": "^7.0.2",
+    "marked": "^7.0.4",
     "mavon-editor": "^2.10.4",
     "vue": "^2.6.14",
     "vue-markdown": "^2.2.4",
