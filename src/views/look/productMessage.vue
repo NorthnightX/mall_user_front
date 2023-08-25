@@ -35,9 +35,30 @@
             <span style="color: orangered;font-size: 18px">{{ productMessage.price }} 元</span>
           </div>
           <div style="height: 1px;background-color: gainsboro;margin-top: 15px"></div>
-          <!--          用户收货地址-->
-          <div style="width: 100%;height: 100px;background-color: #888888">
 
+          <div style="width: 100%;height: 80px;">
+            <div>
+              <div style="margin-top: 20px">
+                <div style="display: flex">
+                  <div style="width: 100px">
+                    <span style="font-size: 17px;color: #888888">总销量</span>
+                  </div>
+                  <div style="margin-left: 50px">
+                    <span style="font-size: 17px;color: #888888">{{productMessage.saleCount}}</span>
+                  </div>
+                </div>
+                <div style="display: flex;margin-top: 30px">
+                  <div style="width: 100px">
+                    <span style="font-size: 17px;color: #888888">库存</span>
+                  </div>
+                  <div style="margin-left: 50px">
+                    <span style="font-size: 17px;color: #888888">{{productMessage.stock}}</span>
+                  </div>
+                </div>
+
+                <br>
+              </div>
+            </div>
           </div>
           <!--          结算-->
           <div style="width: 100%;height: 150px;margin-top: 35px;background-color: #f7f7f7;display: flex;justify-content: left;flex-direction: column">

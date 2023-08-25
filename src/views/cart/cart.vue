@@ -151,7 +151,9 @@ export default {
           this.cartCountForm.id = id
           this.cartCountForm.quantity = product.quantity
           this.$axios.put("/cart/updateCartCount",this.cartCountForm).then(res => {
-
+            if(res.data.code !== 200){
+              this.$message.warning("网络异常")
+            }
           })
         }
       })
@@ -164,11 +166,8 @@ export default {
           this.cartCheckForm.id = id
           this.cartCheckForm.checked = product.checked
           this.$axios.put("/cart/updateCartCheck", this.cartCheckForm).then(res => {
-            if(res.data.code === 200){
-
-            }
-            else {
-              this.$message.warning("网络开小差了")
+            if(res.data.code !== 200){
+              this.$message.warning("网络异常")
             }
           })
         }
@@ -183,11 +182,8 @@ export default {
         this.cartCheckForm.id = product.id
         this.cartCheckForm.checked = product.checked
         this.$axios.put("/cart/updateCartCheck", this.cartCheckForm).then(res => {
-          if(res.data.code === 200){
-
-          }
-          else {
-            this.$message.warning("网络开小差了")
+          if(res.data.code !== 200){
+            this.$message.warning("网络异常")
           }
         })
       });
@@ -198,6 +194,9 @@ export default {
         if (res.data.code === 200) {
           this.cart = res.data.data
           this.updateCheckList();
+        }
+        else if(res.data.code !== 200){
+          this.$message.warning("网络异常")
         }
       })
     },

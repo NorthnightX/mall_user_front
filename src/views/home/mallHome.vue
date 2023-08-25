@@ -8,14 +8,24 @@
       <!--      轮播图-->
       <div style="width: 100%;margin-top: 20px;display: flex;justify-content: center;align-items: center">
         <div style="width: 85%;display: flex;justify-content: space-between;">
-          <div style="width: 20%;height: 300px;background-color: #f0f0f0;margin-right: 10px">
-            <el-breadcrumb separator="/">
-              <el-breadcrumb-item v-for="category in categoryList" :key="category.id" style="margin-top: 5px">
-                <el-button type="text" size="small" style="color: #333333;">{{ category.name }}</el-button>
-              </el-breadcrumb-item>
-            </el-breadcrumb>
+          <div style="width: 15%;height: 300px;background-color: #4f4e4d;margin-right: 10px;display: flex;
+          flex-direction: column;justify-content: center;align-items: center">
+            <el-popover
+                v-for="item in categoryList"
+                :key="item.id"
+                placement="right"
+                width="300"
+                @mouseover="showCategory(item.id)"
+                v-model="visible[item.id]">
+              <div style="margin: 0" v-for="child in childList">
+                <div style="width: 100px;">
+                  <el-button style="color: #333333;font-size: 13px" type="text" size="mini" @click="toSearchPage(child.name)">{{ child.name }}</el-button>
+                </div>
+              </div>
+              <el-button slot="reference" type="text" @click="showCategory(item.id)" style="color: white">{{item.name}}</el-button>
+            </el-popover>
           </div>
-          <div class="block" style=" width: 80%;">
+          <div class="block" style=" width: 85%;">
             <el-carousel height="300px">
               <el-carousel-item v-for="item in 4" :key="item">
                 <img src="../../assets/img/3.jpg" alt="Carousel Image"/>
@@ -113,6 +123,8 @@ export default {
     /* 定义初始化变量 */
 
     return {
+      childList :[],
+      visible: {},
       productRecommendList:[],
       guessProductByUserList: [],
       categoryList: [],
@@ -124,11 +136,24 @@ export default {
   },
   /* 定义事件函数 */
   methods: {
+    toSearchPage(typeName){
+      localStorage.setItem("keyword", typeName)
+      this.$router.push({path: '/mall/search'});
+    },
+    showCategory(id){
+      this.$axios.get("/category/queryChildCategory", {params : {id : id}}).then(res => {
+        if(res.data.code === 200){
+          this.visible[id] = true;
+          this.childList = res.data.data
+        }
+      })
+    },
     getProductMessage(id){
       this.$router.push({path: '/mall/lookProduct', query: {id: id}});
     },
     queryAllCategory() {
-      this.$axios.get("/category/queryAllCategory").then(res => {
+      // this.$axios.get("/category/queryAllCategory").then(res => {
+      this.$axios.get("/category/queryInitialCategory").then(res => {
         if (res.data.code === 200) {
           this.categoryList = res.data.data
         }

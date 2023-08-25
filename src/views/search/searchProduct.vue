@@ -62,12 +62,26 @@
     </div>
 <!--    分类-->
     <div style="width: 100%;height: 75px;background-color: white;display:flex;align-items: center">
-
+      <div style="margin-left: 120px;width: 100px">
+        <span style=";font-size: 14px;color: #888888">分类</span>
+      </div>
+        <div v-for="item in categoryList" :key="item.id" style="margin-left: 50px;width: 100px">
+          <el-dropdown trigger="click" @click.native="showCategory(item.id)">
+              <span class="el-dropdown-link" style="font-size: 14px;color: #888888">
+                {{ item.name }}
+              </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item v-for="child in childList"
+                                :key="child.id" @click.native="toSearch(child.name )">{{ child.name }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
     </div>
 <!--    商品区-->
     <div style="width: 100%;display: flex;align-items: center;background-color: #f0f0f0;justify-content: center;flex-direction: column">
       <div style="width: 80%; display: flex; flex-wrap: wrap; justify-content: center;">
         <div
+            @click="getProductMessage(product.id)"
             class="product-card"
             v-for="product in productList"
             :key="product.id"
@@ -126,6 +140,8 @@ export default {
   name: "search",
   data() {
     return {
+      childList:[],
+      categoryList:[],
       showPagination:true,
       user: {},
       login: false,
@@ -141,6 +157,25 @@ export default {
   computed: {
   },
   methods: {
+    toSearch(typeName){
+      localStorage.setItem("keyword", typeName)
+      this.formInline.keyword = typeName;
+      this.queryByKeyword()
+    },
+    showCategory(id){
+      this.$axios.get("/category/queryChildCategory", {params : {id : id}}).then(res => {
+        if(res.data.code === 200){
+          this.childList = res.data.data
+        }
+      })
+    },
+    queryAllCategory() {
+      this.$axios.get("/category/queryInitialCategory").then(res => {
+        if (res.data.code === 200) {
+          this.categoryList = res.data.data
+        }
+      })
+    },
     toCart(){
       this.$router.push({path: '/mall/cart'});
     },
@@ -149,6 +184,9 @@ export default {
         this.login = true;
         this.user = JSON.parse(localStorage.getItem("user"))
       }
+    },
+    getProductMessage(id){
+      this.$router.push({path: '/mall/lookProduct', query: {id: id}});
     },
     searchProduct() {
       this.queryByKeyword();
@@ -177,12 +215,16 @@ export default {
 
           }
       })
+    },
+    getKeyWord(){
+      this.formInline.keyword = localStorage.getItem("keyword")
     }
   },
   created() {
-    this.formInline.keyword = this.$route.query.keyword || ''; // 使用默认值为空字符串
+    this.getKeyWord()
     this.queryByKeyword()
     this.getUser()
+    this.queryAllCategory()
   },
 };
 </script>
