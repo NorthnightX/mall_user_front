@@ -15,8 +15,11 @@
             </el-button>
           </div>
           <div v-if="login">
-            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">{{user.nickName}}</el-button>
-            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px" @click="toCart()">购物车</el-button>
+            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">{{ user.nickName }}
+            </el-button>
+            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px" @click="toCart()">
+              购物车
+            </el-button>
             <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">消息通知</el-button>
           </div>
           <div v-if="!login">
@@ -29,7 +32,7 @@
       <div>
         <div style="display: flex; justify-content: center;align-items: center;">
           <div style="align-items: center;justify-content: center;display: flex">
-            <img src="../../assets/img/img_1.png" style="width: 55px;height: 55px">
+            <img src="../../assets/img/img_1.png" style="width: 55px;height: 55px" @click="toHome">
             <el-button type="text" style="color : #333333;font-size: 16px;margin-left: 300px">小米手机</el-button>
             <el-button type="text" style="color : #333333;font-size: 16px;">路由器</el-button>
             <el-button type="text" style="color : #333333;font-size: 16px">Redmi手机</el-button>
@@ -56,29 +59,32 @@
     </div>
     <div style="width: 100%;height: 30px;background-color: #f0f0f0;display:flex;align-items: center">
       <el-breadcrumb separator="/" style="margin-left: 8%">
-        <el-breadcrumb-item style="font-size: 12px;color: #888888" :to="{ path: '/mall/home' }">首页</el-breadcrumb-item>
+        <el-breadcrumb-item style="font-size: 12px;color: #888888" :to="{ path: '/mall/home' }">首页
+        </el-breadcrumb-item>
         <el-breadcrumb-item style="font-size: 12px;color: #888888"><a href="/">全部结果</a></el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-<!--    分类-->
+    <!--    分类-->
     <div style="width: 100%;height: 75px;background-color: white;display:flex;align-items: center">
       <div style="margin-left: 120px;width: 100px">
         <span style=";font-size: 14px;color: #888888">分类</span>
       </div>
-        <div v-for="item in categoryList" :key="item.id" style="margin-left: 50px;width: 100px">
-          <el-dropdown trigger="click" @click.native="showCategory(item.id)">
+      <div v-for="item in categoryList" :key="item.id" style="margin-left: 50px;width: 100px">
+        <el-dropdown trigger="click" @click.native="showCategory(item.id)">
               <span class="el-dropdown-link" style="font-size: 14px;color: #888888">
                 {{ item.name }}
               </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item v-for="child in childList"
-                                :key="child.id" @click.native="toSearch(child.name )">{{ child.name }}</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </div>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item v-for="child in childList"
+                              :key="child.id" @click.native="toSearch(child.name )">{{ child.name }}
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
     </div>
-<!--    商品区-->
-    <div style="width: 100%;display: flex;align-items: center;background-color: #f0f0f0;justify-content: center;flex-direction: column">
+    <!--    商品区-->
+    <div
+        style="width: 100%;display: flex;align-items: center;background-color: #f0f0f0;justify-content: center;flex-direction: column">
       <div style="width: 80%; display: flex; flex-wrap: wrap; justify-content: center;">
         <div
             @click="getProductMessage(product.id)"
@@ -103,7 +109,7 @@
           <div style="justify-content: center;display: flex;align-items: center;margin-top: 20px">
             <div style="justify-content: center;display: flex;align-items: center">
               <div v-for="image in JSON.parse(product.subImages)" :key="image" style="width: 45px;height: 45px">
-                <img :src="image" alt="Sub Image" style="width: 35px; height: 35px;" />
+                <img :src="image" alt="Sub Image" style="width: 35px; height: 35px;"/>
               </div>
             </div>
           </div>
@@ -133,6 +139,7 @@
 
 <script>
 import Header from '../component/Header.vue';
+
 export default {
   components: {
     Header
@@ -140,31 +147,33 @@ export default {
   name: "search",
   data() {
     return {
-      childList:[],
-      categoryList:[],
-      showPagination:true,
+      childList: [],
+      categoryList: [],
+      showPagination: true,
       user: {},
       login: false,
       formInline: {
-        keyword:''
+        keyword: ''
       },
-      productList:[],
+      productList: [],
       pageNum: 1, // 当前页码
       pageSize: 20, // 每页显示的博客数量
       total: 0,
     };
   },
-  computed: {
-  },
+  computed: {},
   methods: {
-    toSearch(typeName){
+    toHome() {
+      this.$router.push({path: '/mall/home'});
+    },
+    toSearch(typeName) {
       localStorage.setItem("keyword", typeName)
       this.formInline.keyword = typeName;
       this.queryByKeyword()
     },
-    showCategory(id){
-      this.$axios.get("/category/queryChildCategory", {params : {id : id}}).then(res => {
-        if(res.data.code === 200){
+    showCategory(id) {
+      this.$axios.get("/category/queryChildCategory", {params: {id: id}}).then(res => {
+        if (res.data.code === 200) {
           this.childList = res.data.data
         }
       })
@@ -176,16 +185,16 @@ export default {
         }
       })
     },
-    toCart(){
+    toCart() {
       this.$router.push({path: '/mall/cart'});
     },
-    getUser(){
-      if(localStorage.getItem("user") != null){
+    getUser() {
+      if (localStorage.getItem("user") != null) {
         this.login = true;
         this.user = JSON.parse(localStorage.getItem("user"))
       }
     },
-    getProductMessage(id){
+    getProductMessage(id) {
       this.$router.push({path: '/mall/lookProduct', query: {id: id}});
     },
     searchProduct() {
@@ -200,23 +209,23 @@ export default {
       this.pageNum = val
       this.queryByKeyword()
     },
-    queryByKeyword(){
+    queryByKeyword() {
       this.$axios.get("/product/queryProductByKeyword", {
-        params : {
+        params: {
           keyword: this.formInline.keyword,
           pageNum: this.pageNum,
           pageSize: this.pageSize
-        }}).then(res => {
-          if(res.data.code === 200){
-            this.productList = res.data.data.records
-            this.total = res.data.data.total
-          }
-          else {
+        }
+      }).then(res => {
+        if (res.data.code === 200) {
+          this.productList = res.data.data.records
+          this.total = res.data.data.total
+        } else {
 
-          }
+        }
       })
     },
-    getKeyWord(){
+    getKeyWord() {
       this.formInline.keyword = localStorage.getItem("keyword")
     }
   },

@@ -18,14 +18,14 @@
     <div style="width: 100%;height: 3px;background-color: orangered"></div>
 
     <div style="width: 100%; height: 900px;background-color: #f7f7f7;display: flex;align-items: center;justify-content: center">
-      <div style="width: 85%;height: 800px;background-color: white;display:flex;justify-content: center">
+      <div style="width: 85%;height: 800px;background-color: white;display:flex;justify-content: center;">
           <div style="margin-top: 50px">
             <span style="color: gray;font-size: 20px">支付成功，你的订单号是</span><br>
             <span style="color: gray;font-size: 20px">{{ order }}</span>
+            <div style="margin-top: 50px;display: flex;align-items: center;justify-content: center">
+              <el-button style="font-size: 20px;color: #3a8ee6" type="text" @click="goHome">点击返回主页</el-button>
+            </div>
           </div>
-        <div>
-
-        </div>
       </div>
     </div>
     <!-- Footer -->

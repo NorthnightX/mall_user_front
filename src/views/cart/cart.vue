@@ -140,6 +140,10 @@ export default {
   /* 定义事件函数 */
   methods: {
     goPay(){
+      if(this.cart.length === 0){
+        this.$message.warning("您的购物车是空的")
+        return;
+      }
       this.$router.push({path: '/mall/pay'})
     },
     goHome(){

@@ -246,6 +246,10 @@ export default {
   /* 定义事件函数 */
   methods: {
     pay(){
+      if(this.selectedAddressId === null || this.payKind === null){
+        this.$message.warning("请认真填写收货信息")
+        return;
+      }
       this.payForm.shippingId = this.selectedAddressId
       this.payForm.paymentType = this.payKind
       this.$axios.post("/order/payOrder", this.payForm).then(res => {

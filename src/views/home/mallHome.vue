@@ -27,8 +27,11 @@
           </div>
           <div class="block" style=" width: 85%;">
             <el-carousel height="300px">
-              <el-carousel-item v-for="item in 4" :key="item">
-                <img src="../../assets/img/3.jpg" alt="Carousel Image"/>
+              <el-carousel-item v-for="item in promotionList" :key="item">
+                <div>
+                  <img :src="item.productDTO.mainImage" alt="Carousel Image" style="width: 100%;height: 300px" @click="getProductMessage(item.productDTO.id)"/>
+                </div>
+
               </el-carousel-item>
             </el-carousel>
           </div>
@@ -80,6 +83,7 @@
             <div
                 class="product-card"
                 v-for="(product, index) in productRecommendList"
+                @click="getProductMessage(product.id)"
                 :key="product.id"
                 v-if="index < 10"
                 style="background-color: white; margin: 10px; text-align: center; width: calc(20% - 20px);height: 300px">
@@ -123,6 +127,7 @@ export default {
     /* 定义初始化变量 */
 
     return {
+      promotionList:[],
       childList :[],
       visible: {},
       productRecommendList:[],
@@ -185,7 +190,17 @@ export default {
 
         }
       })
-    }
+    },
+    productPromotion(){
+      this.$axios.get("/advertise/recommend").then(res =>{
+        if(res.data.code === 200){
+          this.promotionList = res.data.data
+        }
+        else {
+
+        }
+      })
+    },
   }
   ,
   /* vue的生命周期函数
@@ -195,6 +210,7 @@ export default {
     this.queryAllCategory()
     this.guessUserLike()
     this.productRecommend()
+    this.productPromotion()
   }
 }
 </script>

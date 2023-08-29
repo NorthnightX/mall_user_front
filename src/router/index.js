@@ -48,6 +48,26 @@ const routes = [
     path: '/mall/paySuccess',
     name: 'pay',
     component:  () => import("../views/pay/paySuccess.vue")
+  },
+  {
+    path: '/mall/userInfo',
+    name: 'userInfo',
+    component:  () => import("../views/user/user.vue")
+  },
+  {
+    path: '/mall/address',
+    name: 'address',
+    component:  () => import("../views/user/address.vue")
+  },
+  {
+    path: '/mall/myOrder',
+    name: 'myOrder',
+    component:  () => import("../views/user/myOrder.vue")
+  },
+  {
+    path: '/mall/browsingHistory',
+    name: 'browsingHistory',
+    component:  () => import("../views/user/browsingHistory.vue")
   }
 ]
 

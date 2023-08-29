@@ -21,7 +21,9 @@
               </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>用户信息</el-dropdown-item>
+              <el-dropdown-item @click.native="browsingHistory()">浏览记录</el-dropdown-item>
               <el-dropdown-item @click.native="toAddress()">收货地址</el-dropdown-item>
+              <el-dropdown-item @click.native="myOrder()">购买记录</el-dropdown-item>
               <el-dropdown-item @click.native="showLogoutConfirm()">登出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
@@ -39,7 +41,7 @@
     <div>
       <div style="display: flex; justify-content: center;align-items: center;">
         <div style="align-items: center;justify-content: center;display: flex">
-          <img src="../../assets/img/img_1.png" style="width: 55px;height: 55px">
+          <img src="../../assets/img/img_1.png" style="width: 55px;height: 55px" @click="toHome">
           <el-button type="text" style="color : #333333;font-size: 16px;margin-left: 300px">小米手机</el-button>
           <el-button type="text" style="color : #333333;font-size: 16px;">路由器</el-button>
           <el-button type="text" style="color : #333333;font-size: 16px">Redmi手机</el-button>
@@ -82,6 +84,15 @@ export default {
   },
   /* 定义事件函数 */
   methods: {
+    myOrder(){
+
+    },
+    toHome(){
+      this.$router.push({path: '/mall/home'});
+    },
+    browsingHistory(){
+      this.$router.push({path: '/mall/browsingHistory'});
+    },
     getUser() {
       if (localStorage.getItem("user") != null) {
         this.login = true;
