@@ -1,5 +1,5 @@
 <template>
-  <div class="search">
+  <div class="search" v-loading="loading">
     <div>
       <div class="header"
            style="background-color: #333333; width: 100%; height: 40px; align-items: center;display: flex;justify-content: center">
@@ -15,8 +15,18 @@
             </el-button>
           </div>
           <div v-if="login">
-            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">{{ user.nickName }}
-            </el-button>
+            <el-dropdown>
+              <el-button type="text" style="color:gainsboro; font-size: 13px;" class="el-dropdown-link">
+                {{ user.nickName }}
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>用户信息</el-dropdown-item>
+                <el-dropdown-item @click.native="browsingHistory()">浏览记录</el-dropdown-item>
+                <el-dropdown-item @click.native="toAddress()">收货地址</el-dropdown-item>
+                <el-dropdown-item @click.native="myOrder()">购买记录</el-dropdown-item>
+                <el-dropdown-item @click.native="showLogoutConfirm()">登出</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
             <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px" @click="toCart()">
               购物车
             </el-button>
@@ -85,7 +95,7 @@
     <!--    商品区-->
     <div
         style="width: 100%;display: flex;align-items: center;background-color: #f0f0f0;justify-content: center;flex-direction: column">
-      <div style="width: 80%; display: flex; flex-wrap: wrap; justify-content: center;">
+      <div style="width: 80%; display: flex; flex-wrap: wrap; justify-content: center;" v-if="productList.length > 0">
         <div
             @click="getProductMessage(product.id)"
             class="product-card"
@@ -113,6 +123,11 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div style="width: 80%; display: flex; flex-wrap: wrap; justify-content: center;" v-else>
+        <div>
+            <img src="../../assets/img/img_2.png">
         </div>
       </div>
       <div class="pagination" v-show="showPagination">
@@ -147,6 +162,7 @@ export default {
   name: "search",
   data() {
     return {
+      loading: false,
       childList: [],
       categoryList: [],
       showPagination: true,
@@ -163,6 +179,32 @@ export default {
   },
   computed: {},
   methods: {
+    myOrder(){
+      this.$router.push({path: '/mall/myOrder'});
+    },
+    browsingHistory(){
+      this.$router.push({path: '/mall/browsingHistory'});
+    },
+    showLogoutConfirm() {
+      this.$confirm('确定要登出吗？', '确认登出', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        // 用户点击确定按钮，执行登出操作
+        this.logout();
+      }).catch(() => {
+        // 用户点击取消按钮，不执行任何操作
+      });
+    },
+    logout() {
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      this.$router.push({path: '/'});
+    },
+    toAddress() {
+
+    },
     toHome() {
       this.$router.push({path: '/mall/home'});
     },
@@ -230,10 +272,12 @@ export default {
     }
   },
   created() {
+    this.loading = true
     this.getKeyWord()
     this.queryByKeyword()
     this.getUser()
     this.queryAllCategory()
+    this.loading = false
   },
 };
 </script>

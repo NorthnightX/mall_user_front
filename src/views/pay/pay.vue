@@ -1,5 +1,5 @@
 <template>
-  <div class="cart">
+  <div class="cart" >
     <div>
       <div style="display: flex;align-items: center;justify-content: left">
         <div style="margin-top: 20px;margin-left: 110px;margin-bottom: 20px">
@@ -50,7 +50,7 @@
                     <el-radio   class="hide-label" style="margin-left: 30px;margin-top: 5px;" v-model="selectedAddressId" :value="address.id" :label="address.id">
                       {{''}}
                     </el-radio>
-                    <el-button type="text" style="font-size: 17px;margin-right: 30px" class="el-icon-edit"></el-button>
+                    <el-button type="text" style="font-size: 17px;margin-right: 30px" class="el-icon-edit" @click="editShipping(address)"></el-button>
                   </div>
                 </div>
               </div>
@@ -117,7 +117,7 @@
           </div>
         </div>
     </div>
-    <el-dialog :visible.sync="showAddShippingVisible" title="添加新地址" width="50%" @click='closeDialog("edit")'>
+    <el-dialog :visible.sync="showAddShippingVisible" title="添加新地址" width="50%" @close="closeDialog">
     <el-form :model="shippingForm" label-width="120px" :rules=shippingFormRules>
       <el-form-item label="收货姓名" prop="receiverName">
         <el-input v-model="shippingForm.receiverName"></el-input>
@@ -170,6 +170,60 @@
       </el-form-item>
     </el-form>
     </el-dialog>
+<!--    修改地址-->
+    <el-dialog :visible.sync="editAddressFormVisible" title="修改地址" width="50%"@close="closeDialog">
+      <el-form :model="addressForm" label-width="120px" :rules=shippingFormRules>
+        <el-form-item label="收货姓名" prop="receiverName">
+          <el-input v-model="addressForm.receiverName"></el-input>
+        </el-form-item>
+        <el-form-item label="收货固定电话" prop="receiverPhone">
+          <el-input v-model="addressForm.receiverPhone"></el-input>
+        </el-form-item>
+        <el-form-item label="收货移动电话" prop="receiverMobile">
+          <el-input v-model="addressForm.receiverMobile"></el-input>
+        </el-form-item>
+        <el-form-item label="省份" prop="receiverProvince">
+          <el-select @change="loadCitiesUpdate"  v-model="addressForm.receiverProvince">
+            <el-option
+                v-for="province in provinces"
+                :key="province.id"
+                :label="province.name"
+                :value="province.province">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="城市" prop="receiverCity">
+          <el-select :disabled = disabledCity  @change="loadDistrictsUpdate" v-model="addressForm.receiverCity">
+            <el-option
+                v-for="city in cities"
+                :key="city.id"
+                :label="city.name"
+                :value="city.city">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="区/县" prop="receiverDistrict">
+          <el-select :disabled = disabledAreas v-model="addressForm.receiverDistrict">
+            <el-option
+                v-for="district in districts"
+                :key="district.id"
+                :label="district.name"
+                :value="district.area">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="详细地址" prop="receiverAddress">
+          <el-input v-model="addressForm.receiverAddress"></el-input>
+        </el-form-item>
+        <el-form-item label="邮编" prop="receiverZip">
+          <el-input v-model="addressForm.receiverZip"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitUpdateForm">提交</el-button>
+          <el-button  @click='closeDialog("edit")'>取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
     <!-- Footer -->
     <div style="display: flex;justify-content: center;align-items: center;flex-direction: column">
       <div class="footer-content">
@@ -196,6 +250,17 @@ export default {
   data() {
     /* 定义初始化变量 */
     return {
+      addressForm:{
+        receiverName: '',
+        receiverPhone: '',
+        receiverMobile: '',
+        receiverProvince: '',
+        receiverCity: '',
+        receiverDistrict: '',
+        receiverAddress: '',
+        receiverZip: ''
+      },
+      editAddressFormVisible: false,
       payKind:null,
       selectedAddressId: null,
       cart:[],
@@ -204,8 +269,6 @@ export default {
         receiverPhone: [{ required: true, message: '请输入收货固定电话', trigger: 'blur' }],
         receiverMobile: [{ required: true, message: '请输入收货移动电话', trigger: 'blur' }],
         receiverProvince: [{ required: true, message: '请选择省份', trigger: 'change' }],
-        // receiverCity: [{ required: true, message: '请选择城市', trigger: 'change' }],
-        // receiverDistrict: [{ required: true, message: '请选择区/县', trigger: 'change' }],
         receiverAddress: [{ required: true, message: '请输入详细地址', trigger: 'blur' }],
         receiverZip: [{ required: true, message: '请输入邮编', trigger: 'blur' }]
       },
@@ -245,11 +308,38 @@ export default {
   },
   /* 定义事件函数 */
   methods: {
+    submitUpdateForm(){
+      this.$axios.put("/shipping/updateShipping", this.addressForm).then(res => {
+        if(res.data.code === 200){
+          this.$message.success("修改成功")
+        }
+        else{
+          this.$message.warning(res.data.message)
+        }
+        this.editAddressFormVisible = false
+        this.provinces =[]
+        this.cities = []
+        this.districts = []
+        this.getProvinces()
+        this.getShipping()
+      })
+    },
+    editShipping(address){
+      this.addressForm = address
+      this.editAddressFormVisible = true
+      this.addressForm = {...address}
+    },
     pay(){
       if(this.selectedAddressId === null || this.payKind === null){
         this.$message.warning("请认真填写收货信息")
         return;
       }
+      const loading = this.$loading({
+        lock: true,
+        text: '订单提交中，请勿关闭',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.payForm.shippingId = this.selectedAddressId
       this.payForm.paymentType = this.payKind
       this.$axios.post("/order/payOrder", this.payForm).then(res => {
@@ -260,6 +350,7 @@ export default {
           else {
             this.$message.warning(res.data.message)
           }
+          loading.close()
       })
     },
 
@@ -276,45 +367,66 @@ export default {
         if(res.data.code === 200){
           this.cities = res.data.data
           this.disabledCity = false
+          this.shippingForm.receiverCity = ''
+          this.shippingForm.receiverDistrict = ''
         }
       })
     },
-
+    loadCitiesUpdate() {
+      this.$axios.get(`/province/getCities/${this.addressForm.receiverProvince}`).then(res => {
+        if(res.data.code === 200){
+          this.cities = res.data.data
+          this.disabledCity = false
+          this.addressForm.receiverCity = ''
+          this.addressForm.receiverDistrict = ''
+        }
+      })
+    },
+    loadDistrictsUpdate(){
+      this.$axios.get(`/province/getAreas`,
+          {params: {cityId : this.addressForm.receiverCity, provinceId : this.addressForm.receiverProvince}}).then(res => {
+        if(res.data.code === 200){
+          this.districts = res.data.data
+          this.disabledAreas = false
+          this.addressForm.receiverDistrict = ''
+        }
+      })
+    },
     loadDistricts() {
       this.$axios.get(`/province/getAreas`,
           {params: {cityId : this.shippingForm.receiverCity, provinceId : this.shippingForm.receiverProvince}}).then(res => {
         if(res.data.code === 200){
           this.districts = res.data.data
           this.disabledAreas = false
+          this.shippingForm.receiverDistrict = ''
         }
       })
     },
     closeDialog() {
       this.showAddShippingVisible = false
+      this.editAddressFormVisible =false
+      this.disabledCity = true
+      this.disabledAreas = true
+      this.shippingForm.receiverCity = ''
+      this.shippingForm.receiverDistrict = ''
+      this.shippingForm.receiverProvince = ''
     },
     submitForm() {
       // 在这里提交表单数据到后端
       this.$axios.post("/shipping/addShipping", this.shippingForm).then(res => {
         if(res.data.code === 200){
-          this.showAddShippingVisible = false
-          this.resetForm()
           this.$message.success("添加成功")
-          this.provinces =[]
-          this.cities = []
-          this.districts = []
-          this.getProvinces()
-          this.getShipping()
         }
         else {
           this.$message.warning(res.data.message)
-          this.showAddShippingVisible = false
-          this.resetForm()
-          this.provinces =[]
-          this.cities = []
-          this.districts = []
-          this.getProvinces()
-          this.getShipping()
         }
+        this.showAddShippingVisible = false
+        this.resetForm()
+        this.provinces =[]
+        this.cities = []
+        this.districts = []
+        this.getProvinces()
+        this.getShipping()
       })
     },
     resetForm() {

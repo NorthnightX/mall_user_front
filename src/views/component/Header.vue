@@ -16,9 +16,9 @@
         <div v-if="login">
           <!--          <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">{{user.nickName}}</el-button>-->
           <el-dropdown>
-              <span class="el-dropdown-link">
+              <el-button type="text" style="color:gainsboro; font-size: 13px;" class="el-dropdown-link">
                   {{ user.nickName }}
-              </span>
+              </el-button>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>用户信息</el-dropdown-item>
               <el-dropdown-item @click.native="browsingHistory()">浏览记录</el-dropdown-item>
@@ -55,7 +55,7 @@
         <div style="margin-left: 10%">
           <el-form :inline="true" :model="formInline" class="user-search">
             <el-form-item>
-              <el-input v-model="formInline.keyword" style="margin-top: 14px" placeholder="请输入想要查询的商品">
+              <el-input v-model="formInline.keyword" style="margin-top: 14px" placeholder="请输入查询的商品或分类">
                 <!-- 在搜索栏中添加一个图标按钮 -->
                 <el-button slot="append" icon="el-icon-search" size="small" circle
                            @click="searchProduct()"></el-button>
@@ -85,7 +85,7 @@ export default {
   /* 定义事件函数 */
   methods: {
     myOrder(){
-
+      this.$router.push({path: '/mall/myOrder'});
     },
     toHome(){
       this.$router.push({path: '/mall/home'});
@@ -100,6 +100,10 @@ export default {
       }
     },
     searchProduct() {
+      if(this.formInline.keyword === ''){
+        this.$message.warning("请输入您想要查询的商品名或分类")
+        return;
+      }
       this.$router.push({path: '/mall/search', query: {keyword: this.formInline.keyword}});
     },
     toCart() {

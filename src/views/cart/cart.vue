@@ -41,7 +41,7 @@
         </div>
         <div style="width: 100%;height: 0.5px;background-color: #e6e3e3"></div>
         <!--        购物车商品信息-->
-        <el-checkbox-group v-model="checkList">
+        <el-checkbox-group v-model="checkList" v-if="cart.length > 0">
           <div v-for="product in cart" :key="product.id" style="width: 100%;height: 120px;">
             <div style="height: 120px;width: 100%;display: flex;align-items: center;">
               <div class="item-select"
@@ -72,6 +72,14 @@
             <div style="width: 100%;height: 0.5px;background-color: #e6e3e3"></div>
           </div>
         </el-checkbox-group>
+        <div v-else style="display: flex;align-items: center;justify-content: center">
+          <div style="display: flex;flex-direction: column;align-items: center">
+            <img src="../../assets/img/img_2.png">
+            <div style="margin-bottom: 20px">
+              <span style="color: #888888;font-size: 20px">购物车是空的</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div
