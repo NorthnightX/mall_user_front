@@ -15,14 +15,13 @@
             </el-button>
           </div>
           <div v-if="login">
-            <el-dropdown>
+            <el-dropdown placement="bottom">
               <el-button type="text" style="color:gainsboro; font-size: 13px;" class="el-dropdown-link">
                 {{ user.nickName }}
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item>用户信息</el-dropdown-item>
                 <el-dropdown-item @click.native="browsingHistory()">浏览记录</el-dropdown-item>
-                <el-dropdown-item @click.native="toAddress()">收货地址</el-dropdown-item>
                 <el-dropdown-item @click.native="myOrder()">购买记录</el-dropdown-item>
                 <el-dropdown-item @click.native="showLogoutConfirm()">登出</el-dropdown-item>
               </el-dropdown-menu>
@@ -201,9 +200,6 @@ export default {
       localStorage.removeItem("token")
       localStorage.removeItem("user")
       this.$router.push({path: '/'});
-    },
-    toAddress() {
-
     },
     toHome() {
       this.$router.push({path: '/mall/home'});
