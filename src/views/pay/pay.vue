@@ -344,8 +344,8 @@ export default {
       this.payForm.paymentType = this.payKind
       this.$axios.post("/order/payOrder", this.payForm).then(res => {
           if(res.data.code === 200){
-            this.$message.success("支付成功")
-            this.$router.push({path: '/mall/paySuccess',query: {orderNumber: res.data.data}} )
+            this.$message.success("提交成功")
+            this.$router.push({path: '/mall/payForProduct',query: {orderNumber: res.data.data}} )
           }
           else {
             this.$message.warning(res.data.message)

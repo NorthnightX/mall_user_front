@@ -20,7 +20,7 @@
                   {{ user.nickName }}
               </el-button>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>用户信息</el-dropdown-item>
+              <el-dropdown-item @click.native="myInfo()">用户信息</el-dropdown-item>
               <el-dropdown-item @click.native="browsingHistory()">浏览记录</el-dropdown-item>
               <el-dropdown-item @click.native="myOrder()">购买记录</el-dropdown-item>
               <el-dropdown-item @click.native="showLogoutConfirm()">登出</el-dropdown-item>
@@ -83,6 +83,9 @@ export default {
   },
   /* 定义事件函数 */
   methods: {
+    myInfo(){
+      this.$router.push({path: '/mall/userInfo'});
+    },
     myOrder(){
       this.$router.push({path: '/mall/myOrder'});
     },

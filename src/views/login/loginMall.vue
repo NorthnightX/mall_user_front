@@ -32,9 +32,9 @@
     </el-card>
     <el-card v-show="isReg" style="width: 50%; height: auto">
       <div class="loginTitle">注册</div>
-      <el-form :model="regForm" ref="regForm">
-        <el-form-item prop="name" label="登录用户名">
-          <el-input v-model="regForm.name" placeholder="请输入用户名"></el-input>
+      <el-form :model="regForm" ref="regForm" :rules="regRules">
+        <el-form-item prop="username" label="登录用户名">
+          <el-input v-model="regForm.username" placeholder="请输入用户名"></el-input>
         </el-form-item>
         <el-form-item prop="nickName" label="显示昵称">
           <el-input v-model="regForm.nickName" placeholder="请输入显示昵称"></el-input>
@@ -43,13 +43,13 @@
           <el-input type="password"  show-password v-model="regForm.password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item prop="password" label="确认密码">
-          <el-input type="password"  show-password v-model="regForm.password" placeholder="请再次输入密码"></el-input>
+          <el-input type="password"  show-password v-model="regForm.confirmPassword" placeholder="请再次输入密码"></el-input>
         </el-form-item>
         <el-form-item prop="email" label="邮箱">
           <el-input v-model="regForm.email" placeholder="请输入邮箱"></el-input>
         </el-form-item>
         <el-form-item prop="phone" label="手机号">
-          <el-input type="phone"  show-password v-model="regForm.phone" placeholder="请输入手机号"></el-input>
+          <el-input type="phone" v-model="regForm.phone" placeholder="请输入手机号"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button class="loginButton" type="primary" @click="reg()">注册</el-button>
@@ -70,6 +70,23 @@ export default {
       interval:'',//定时器
       url:'',
       redisKey:'',
+      regRules: {
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+        nickName: [{ required: true, message: '请输入显示昵称', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        confirmPassword: [
+          { required: true, message: '请再次输入密码', trigger: 'blur' },
+          { validator: this.checkPassword, trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
+        ],
+        phone: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          { pattern: /^1\d{10}$/, message: '请输入正确的手机号格式', trigger: 'blur' }
+        ]
+      },
       loginRules:{
         phone: [ {required: true, message: '请填写手机号', trigger: 'blur'}],
         password: [
@@ -84,6 +101,7 @@ export default {
         email:'',
         phone:'',
         password:'',
+        confirmPassword:'',
       },
       loginForm:{
         phone:'',
@@ -95,8 +113,24 @@ export default {
   },
   /* 定义事件函数 */
   methods:{
+    checkPassword(rule, value, callback) {
+      if (value !== this.regForm.password) {
+        callback(new Error('两次输入的密码不一致'));
+      } else {
+        callback();
+      }
+    },
     reg(){
-
+      this.$axios.post("/user/reg", this.regForm).then(res => {
+        if(res.data.code === 200){
+          this.$message.success("注册成功，请前往邮箱确认")
+          this.isReg = false
+        }
+        else
+        {
+          this.$message.error(res.data.message)
+        }
+      })
     },
     register(){
       this.isLogin = false;

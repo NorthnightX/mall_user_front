@@ -92,7 +92,7 @@
       </div>
     </div>
     <div style="width: 100%;height: auto;display: flex;flex-direction: column;align-items:center;margin-top: 20px;">
-      <div class="editor" style="margin-top: 50px;width: 84%">
+      <div class="editor" style="margin-top: 50px;width: 84%" v-show="isBuyProduct">
         <div>
           <span style="font-size: 20px;font-weight: bold">发布评论</span>
           <hr class="gray-hr"/>
@@ -181,6 +181,7 @@ export default {
   data() {
     /* 定义初始化变量 */
     return {
+      isBuyProduct: false,
       showCommentInput: false,
       activeCommentId: null,
       newCommentText: '',
@@ -260,7 +261,7 @@ export default {
             this.queryComment(this.productMessage.id)
           }, 1000);
         } else {
-          this.$message.warning("网络异常")
+          this.$message.warning(res.data.message)
         }
       })
     },
@@ -304,7 +305,17 @@ export default {
           this.parsedProductDetail = marked(this.productMessage.detail);
         }
       })
+    },
+    isBuy(){
+      this.$axios.get("/orderItem/isBuy", {params : {productId : this.productId}}).then(res => {
+        if(res.data.code === 200){
+          if(res.data.data === true){
+            this.isBuyProduct = true
+          }
+        }
+      })
     }
+
   }
   ,
   /* vue的生命周期函数
@@ -315,6 +326,7 @@ export default {
     this.user = JSON.parse(localStorage.getItem("user"))
     this.getProduct()
     this.queryComment()
+    this.isBuy()
   }
 }
 </script>

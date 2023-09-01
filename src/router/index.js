@@ -55,6 +55,11 @@ const routes = [
     component:  () => import("../views/user/user.vue")
   },
   {
+    path: '/mall/payForProduct',
+    name: 'userInfo',
+    component:  () => import("../views/pay/payForProduct.vue")
+  },
+  {
     path: '/mall/address',
     name: 'address',
     component:  () => import("../views/user/address.vue")

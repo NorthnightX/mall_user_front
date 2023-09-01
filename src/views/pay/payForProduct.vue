@@ -6,10 +6,10 @@
           <img src="../../assets/img/img_1.png" style="width: 50px;height: 50px" @click="goHome()">
         </div>
         <div style="margin-left: 40px">
-          <span style="color: #333333;font-size: 27px">支付成功</span>
+          <span style="color: #333333;font-size: 27px">支付订单</span>
         </div>
         <div style="margin-left: 10px;margin-top: 10px">
-          <span style="color: #888888;font-size: 12px">请耐心等待发货</span>
+          <span style="color: #888888;font-size: 12px">请在30分钟内完成支付</span>
         </div>
         <div style="margin-left: 10px;margin-top: 10px">
         </div>
@@ -17,19 +17,24 @@
     </div>
     <div style="width: 100%;height: 3px;background-color: orangered"></div>
 
-    <div style="width: 100%; height: 600px;background-color: #f7f7f7;display: flex;align-items: center;justify-content: center">
-      <div style="width: 85%;height: 500px;background-color: white;display:flex;justify-content: center;">
-          <div style="margin-top: 50px">
-            <div style="display: flex;align-items: center;justify-content: center">
-              <span style="color: gray;font-size: 20px">支付成功</span><br>
+    <div style="width: 100%; height: 900px;background-color: #f7f7f7;display: flex;align-items: center;justify-content: center">
+      <div style="width: 85%;height: 800px;background-color: white;display:flex;justify-content: center;">
+        <div style="margin-top: 50px">
+          <div style="align-items: center;display: flex;justify-content: center">
+            <span style="color: gray;font-size: 20px">你的订单号是</span><br>
+          </div>
+          <div style="display: flex;align-items: center;justify-content: center">
+            <span style="color: gray;font-size: 20px">{{ order }}</span>
+          </div>
+          <div style="margin-top: 50px;display: flex;align-items: center;justify-content: center;flex-direction: column">
+            <div>
+              <el-button style="font-size: 20px;color: #3a8ee6" type="text" @click="payForProduct()">点击付款</el-button>
             </div>
-            <div style="display: flex;align-items: center;margin-top: 10px">
-              <span style="color: gray;font-size: 18px">我们会尽快发货</span><br>
-            </div>
-            <div style="margin-top: 50px;display: flex;align-items: center;justify-content: center">
+            <div>
               <el-button style="font-size: 20px;color: #3a8ee6" type="text" @click="goHome">点击返回主页</el-button>
             </div>
           </div>
+        </div>
       </div>
     </div>
     <!-- Footer -->
@@ -58,6 +63,10 @@ export default {
   data() {
     /* 定义初始化变量 */
     return {
+      order:'',
+      payForm:{
+        orderNo:''
+      }
     }
   },
   computed: {
@@ -65,7 +74,17 @@ export default {
   },
   /* 定义事件函数 */
   methods: {
-
+    payForProduct(){
+      this.payForm.orderNo = this.order
+      this.$axios.post("/order/payForProduct", this.payForm).then(res => {
+        if(res.data.code === 200){
+          this.$router.push({path: '/mall/paySuccess'})
+        }
+        else {
+          this.$message.warning(res.data.message)
+        }
+      })
+    },
     goHome(){
       this.$router.push({path: '/mall/home'});
     },
@@ -76,6 +95,7 @@ export default {
   当页面加载完毕就会执行created里面的函数
   */
   created() {
+    this.order = this.$route.query.orderNumber || ''; // 使用默认值为空字符串
   }
 }
 </script>
