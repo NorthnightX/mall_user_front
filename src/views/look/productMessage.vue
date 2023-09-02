@@ -112,7 +112,7 @@
         <span style="font-size: 20px;font-weight: bold">商品评论</span>
         <div style="width: 100%;height: 1px;background: #888888;margin-top: 5px"></div>
       </div>
-      <div style="width: 84%;height: 1px;background: #888888">
+      <div style="width: 84%;height: 1px;background: #888888" v-if="commentList.length > 0">
         <div v-for="(comment, index) in commentList" :key="comment.id" style="margin-top: 10px">
           <div class="comment-item">
             <div>
@@ -164,6 +164,11 @@
             </div>
             <hr class="gray-hr" />
           </div>
+        </div>
+      </div>
+      <div v-else style="margin-bottom: 20px">
+        <div>
+          <span style="color: grey;font-size: 20px">暂时没有评论</span>
         </div>
       </div>
     </div>

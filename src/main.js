@@ -37,9 +37,15 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     response => {
         // 检查是否需要清除 Session Storage 中的 token
-        const token= response.headers["authorization"];
-        if (token != null) {
-            localStorage.setItem("token", token)
+        const updateToken= response.headers["update"];
+        if(updateToken != null){
+            localStorage.setItem("token", updateToken)
+        }
+        else {
+            const token= response.headers["authorization"];
+            if (token != null) {
+                localStorage.setItem("token", token)
+            }
         }
         return response;
     }

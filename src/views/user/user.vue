@@ -1,6 +1,6 @@
 <template>
   <el-container style="height: 100%">
-    <el-header style="background-color: black;display: flex;align-items: center;justify-content: space-between"
+    <el-header style="background-color: orange;display: flex;align-items: center;justify-content: space-between"
                class="fixed-header">
       <div style="display: flex;margin-left: 10px">
         <img src="../../assets/img/img_1.png" style="width: 40px" @click="toHome">
@@ -40,39 +40,39 @@
 
               <div class="input-container">
                 <span class="input-label">显示昵称</span>
-                <el-input @focus="showBorderNickName"
+                <el-input @focus="showBorderNickName"  @blur="hideBorder"
                           style="width: 100%;padding-bottom: 10px" v-model="formData.nickName"></el-input>
                 <div class="buttons" v-show="showButtonsNickName">
-                  <el-button @click="updateUserNickName($event)" type="primary">确定</el-button>
-                  <el-button @click="handleButtonNickName">取消</el-button>
+                  <el-button @mousedown.native="updateUserNickName($event)" type="primary">确定</el-button>
+                  <el-button @mousedown.native="handleButtonNickName">取消</el-button>
                 </div>
               </div>
 
               <div class="input-container">
                 <span class="input-label">手机号</span>
-                <el-input @focus="showBorderPhone"
+                <el-input @focus="showBorderPhone" @blur="hideBorder"
                           style="width: 100%;padding-bottom: 10px" v-model="formData.phone"></el-input>
                 <div class="buttons" v-show="showButtonsPhone">
-                  <el-button @click="updateUserPhone" type="primary">确定</el-button>
-                  <el-button @click="handleButtonPhone">取消</el-button>
+                  <el-button @mousedown.native="updateUserPhone" type="primary">确定</el-button>
+                  <el-button @mousedown.native="handleButtonPhone">取消</el-button>
                 </div>
               </div>
               <div class="input-container">
                 <span class="input-label">邮箱</span>
-                <el-input @focus="showBorderEmail"
+                <el-input @focus="showBorderEmail" @blur="hideBorder"
                           style="width: 100%;padding-bottom: 10px" v-model="formData.email"></el-input>
                 <div class="buttons" v-show="showButtonsEmail">
-                  <el-button @click="updateUserEmail" type="primary">确定</el-button>
-                  <el-button @click="handleButtonEmail">取消</el-button>
+                  <el-button @mousedown.native="updateUserEmail" type="primary">确定</el-button>
+                  <el-button @mousedown.native="handleButtonEmail">取消</el-button>
                 </div>
               </div>
-              <div class="input-container">
+              <div class="input-container" >
                 <span class="input-label">密码</span>
-                <el-input @focus="showBorderPassword"
+                <el-input @focus="showBorderPassword" @blur="hideBorder" type="password"
                           style="width: 100%;padding-bottom: 10px" v-model="formData.password"></el-input>
                 <div class="buttons" v-show="showButtonsPassword">
-                  <el-button @click="updateUserPassword" type="primary">确定</el-button>
-                  <el-button @click="handleButtonPassword">取消</el-button>
+                  <el-button @mousedown.native="updateUserPassword" type="primary">确定</el-button>
+                  <el-button @mousedown.native="handleButtonPassword">取消</el-button>
                 </div>
               </div>
             </div>
@@ -97,6 +97,7 @@ export default {
       formData: {
         image: '',
         password: "",
+        confirmPassword: "",
         phone: '',
         nickName: '',
         email: '',
@@ -104,6 +105,12 @@ export default {
     };
   },
   methods: {
+    hideBorder(){
+      this.showButtonsPhone = false
+      this.showButtonsEmail =false
+      this.showButtonsNickName = false
+      this.showButtonsPassword = false
+    },
     toHome() {
       this.$router.push('/mall/home');
     },
@@ -131,92 +138,82 @@ export default {
       this.$axios.put("/user/updateUserAvatar", this.formData).then(res => {
         if (res.data.code === 200) {
           this.$message.success(res.data.data)
+          this.queryLoginUser()
         }
       })
-      this.queryLoginUser()
     },
     updateUserNickName() {
       this.$axios.put("/user/updateUserNickName", this.formData).then(res => {
         if (res.data.code === 200) {
           this.$message.success(res.data.data)
+          this.showButtonsNickName = false
+          this.queryLoginUser()
         }
         else{
           this.$message.warning("网络异常")
         }
       })
-      this.showButtonsNickName = false
-      this.queryLoginUser()
     },
     updateUserPassword() {
       this.$axios.put("/user/updateUserPassword", this.formData).then(res => {
         if (res.data.code === 200) {
-          this.$message.success(res.data.data)
+          this.$message.success("修改成功，请重新登录")
+          this.showButtonsPassword = false
+          localStorage.removeItem("user")
+          localStorage.removeItem("token")
+          this.$router.push('/login');
         }
       })
-      this.showButtonsPassword = false
-      this.queryLoginUser()
     },
     updateUserPhone() {
       this.$axios.put("/user/updateUserPhone", this.formData).then(res => {
         if (res.data.code === 200) {
           this.$message.success(res.data.data)
+          this.showButtonsPhone = false
+          this.queryLoginUser()
         }
         else{
           this.$message.warning(res.data.message)
         }
       })
-      this.showButtonsPhone = false
-      this.queryLoginUser()
+
     },
     updateUserEmail() {
       this.$axios.put("/user/updateUserEmail", this.formData).then(res => {
         if (res.data.code === 200) {
           this.$message.success(res.data.data)
+          this.showButtonsEmail = false
+          this.queryLoginUser()
         }
         else{
           this.$message.warning(res.data.message)
         }
       })
-      this.showButtonsEmail = false
-      this.queryLoginUser()
+
     },
     queryLoginUser() {
       this.$axios.get("/user/getLoginUser").then(res => {
         if (res.data.code === 200) {
           localStorage.setItem("user", JSON.stringify(res.data.data))
-          this.getAvatar()
+          let user = JSON.parse(localStorage.getItem("user"))
+          this.formData = {...user}
+          this.userImage = user.avatar
         } else {
           this.$message.warning("网络异常")
         }
-        this.showButtonsEmail = false
-        this.showButtonsNickName = false
-        this.showButtonsPassword = false
-        this.showButtonsPhone = false
       })
     },
     showBorderPassword() {
-      this.showButtonsPassword = true;
-      this.showButtonsEmail = false
-      this.showButtonsNickName = false
-      this.showButtonsPhone = false
+      this.showButtonsPassword = true
     },
     showBorderPhone() {
-      this.showButtonsPhone = true;
-      this.showButtonsEmail = false
-      this.showButtonsNickName = false
-      this.showButtonsPassword = false
+      this.showButtonsPhone = true
     },
     showBorderEmail() {
-      this.showButtonsEmail = true;
-      this.showButtonsNickName = false
-      this.showButtonsPassword = false
-      this.showButtonsPhone = false
+      this.showButtonsEmail = true
     },
     showBorderNickName() {
-      this.showButtonsNickName = true;
-      this.showButtonsEmail = false
-      this.showButtonsPassword = false
-      this.showButtonsPhone = false
+      this.showButtonsNickName = true
     },
     handleButtonPhone() {
       // 处理按钮2的点击事件
@@ -238,15 +235,9 @@ export default {
       this.showButtonsNickName = false
       this.queryLoginUser()
     },
-    getAvatar() {
-      let user = JSON.parse(localStorage.getItem("user"))
-      this.formData = {...user}
-      this.userImage = user.avatar
-    }
   },
   created() {
     this.queryLoginUser()
-    this.getAvatar();
 
 
   }
