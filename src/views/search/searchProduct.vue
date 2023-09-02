@@ -32,7 +32,7 @@
             <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">消息通知</el-button>
           </div>
           <div v-if="!login">
-            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">登录</el-button>
+            <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px" @click.native="toLogin()">登录</el-button>
             <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">注册</el-button>
             <el-button type="text" style="color: gainsboro;  font-size: 12px; margin-left: 5px">消息通知</el-button>
           </div>
@@ -178,6 +178,9 @@ export default {
   },
   computed: {},
   methods: {
+    toLogin(){
+      this.$router.push({path: '/login'});
+    },
     myInfo(){
       this.$router.push({path: '/mall/userInfo'});
     },
