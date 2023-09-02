@@ -2,13 +2,14 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import {Message} from 'element-ui';
 import login from '../views/login/loginMall.vue';
+import mallHome from "../views/home/mallHome.vue";
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
     name: '',
-    component: login,
+    component: mallHome,
     hidden: true,
     meta: {
       requireAuth: false
@@ -91,18 +92,4 @@ const router = new VueRouter({
   routes
 })
 
-// router.beforeEach((to, from, next) => {
-//   if (to.path === '/' || to.path === '/reg' || to.path === '/login') {
-//     return next()
-//   } else {
-//     let user = localStorage.getItem('token')
-//     if (user != null) {
-//       //校验token
-//       return next()
-//     } else {
-//       Message.error('用户未登录')
-//       return next('/')
-//     }
-//   }
-// })
 export default router

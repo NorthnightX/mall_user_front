@@ -23,9 +23,11 @@
             <div style="padding-top: 10px">
               <span style="color: black;font-size: 18px">订单号：{{ item.orderNo }}</span>
             </div>
-            <div style="margin-left: 680px;padding-top: 5px;align-items: center">
+            <div style="margin-left: 600px;padding-top: 5px;align-items: center">
               <span style="color: #888888">订单时间：{{item.gmtCreate}}</span>
-              <el-button style="margin-left: 30px;" type="text" @click="deleteOrder(item.orderNo)">删除</el-button>
+              <el-button style="margin-left: 10px" v-show="item.status === 40" type="text" @click="harvest(item.orderNo)">收货</el-button>
+              <el-button style="margin-left: 10px" v-show="item.status === 20 || item.status === 40" type="text" @click="refund(item.orderNo)">退款</el-button>
+              <el-button style="" type="text" @click="deleteOrder(item.orderNo)">删除</el-button>
             </div>
           </div>
           <div style="display: flex;align-items: center;margin-left: 720px;margin-top: 20px">
@@ -106,6 +108,28 @@ export default {
   computed: {},
   /* 定义事件函数 */
   methods: {
+    refund(id){
+      this.$axios.put(`order/refund/${id}`).then(res => {
+        if(res.data.code === 200){
+          this.$message.success("退款成功")
+          this.myOrder()
+        }
+        else{
+          this.$message.warning(res.data.message)
+        }
+      })
+    },
+    harvest(id){
+      this.$axios.put(`order/harvest/${id}`).then(res => {
+        if(res.data.code === 200){
+          this.$message.success("收货成功")
+          this.myOrder()
+        }
+        else{
+          this.$message.warning(res.data.message)
+        }
+      })
+    },
     deleteOrder(id){
       this.$axios.delete("/order/deleteOrder", {params : {orderId : id}}).then(res => {
         if(res.data.code === 200){
